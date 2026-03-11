@@ -4,14 +4,9 @@ import { defineConfig } from 'astro/config';
 
 import studiocmsUi from '@studiocms/ui';
 
-// @ts-ignore
-import cloudflare from '@astrojs/cloudflare';
-
 // https://astro.build/config
 export default defineConfig({
-  output: "server",
+  output: "static",
   integrations: [studiocmsUi()],
-  adapter: cloudflare({
-     imageService: 'passthrough'
-  })
+  site: "https://th-dd.github.io"
 });
