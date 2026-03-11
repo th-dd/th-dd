@@ -1,12 +1,12 @@
 {
   "profile": {
-    "name": "sipc.ink",
-    "description": "不喧哗，自有声。"
+    "name": "叹号大帝",
+    "description": " "
   },
   "about": {
     "title": "关于我",
-    "old": "一个无所事事的 fvv 职高生",
-    "content": "对 电子产品&编程 感兴趣，喜欢把东西拆开研究，也乐意慢慢把想法做出来。比起头衔，更在意过程和结果。"
+    "old": "喜欢小米的东西🤔",
+    "content": "研究米环 (米坛社区) ，QQ机器人等一些神奇的东西🤯🤯"
   },
   "skills": {
     "title": "技能"
@@ -17,19 +17,19 @@
   "projects": {
     "title": "项目",
     "lyrify_translator": {
-      "name": "Lyrify Translator",
-      "desc": "一款基于大模型的翻译工具，支持多语言互译，提供多种翻译引擎。"
+      "name": "叹号 Bot",
+      "desc": "https://docs.th-dd.top/thbot-commads.html"
     },
     "lyrify_expand": {
-      "name": "Lyrify expand",
-      "desc": "Lyrify Translator 配套逆向节点。"
+      "name": "Nova Bot",
+      "desc": "https://docs.th-dd.top/nobot-commads.html"
     }
   },
   "time": {
     "title": "所在地时间"
   },
   "footer": {
-    "site": "sipc.ink",
+    "site": "th-dd.top",
     "font": "MiSans"
   }
 }
