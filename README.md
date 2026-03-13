@@ -9,7 +9,7 @@
 - **昵称**: 叹号大帝 / 叹号 / thdd
 - **主要方向**: QQ 机器人开发、小米穿戴设备（米坛社区）、小米生态
 - **QQ**: 3856150351
-- **QQ 群**: [点击加入](https://qm.qq.com/q/jvHsCgdhg4)
+- **QQ 跳转链接**: [点我](https://qm.qq.com/q/jvHsCgdhg4)
 
 ## 🔗 链接
 
@@ -22,6 +22,6 @@
 
 ## 🛠️ 项目
 
-- **叹号 Bot** - 基于 NoneBot2 的 QQ 机器人
-- **Nova Bot** - 另一个 QQ 机器人项目
+- **叹号 Bot** - 娱乐型 Bot 无 AI 对话（多平台）
+- **Nova Bot** - QQ 机器人（偏群管型，有AI对话功能）
 - 更多项目请访问 [文档站](https://docs.th-dd.top)
