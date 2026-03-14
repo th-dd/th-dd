@@ -26,6 +26,7 @@ const { t, lang} = useTastro(Astro.request)
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>th-dd.top</title>
+    <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Medium.min.css"/>
     <style>
         * {
             margin: 0;
@@ -59,7 +60,7 @@ const { t, lang} = useTastro(Astro.request)
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.15);
             z-index: 1;
         }
         
@@ -72,13 +73,20 @@ const { t, lang} = useTastro(Astro.request)
             z-index: 2;
         }
         
-        /* 毛玻璃效果 */
-        .glass-card {
-            background: rgba(30, 30, 30, 0.75) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
+        /* 毛玻璃效果 - 强制覆盖 */
+        .glass-card,
+        .glass-card *,
+        [class*="Card"] {
+            background: rgba(20, 20, 20, 0.65) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
             border-radius: 16px !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+        
+        /* 确保内容可见 */
+        .glass-card * {
+            color: #ffffff !important;
         }
         
         .outer-grid {
