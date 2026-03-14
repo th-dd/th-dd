@@ -7,7 +7,6 @@ import { useTastro } from "@sipc.ink/tastro"
 const { t } = useTastro(Astro.request)
 ---
 
-<Card style="width: 100%; min-height: 80px; display: flex; align-items: center; justify-content: center;">
+<Card class="glass-card" style="width: 100%; min-height: 80px; display: flex; align-items: center; justify-content: center;">
     <User name={t("profile.name")} description={t("profile.description")} avatar={ProfileImage} />
 </Card>
-    
