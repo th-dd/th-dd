@@ -6,14 +6,15 @@ import { useTastro } from "@sipc.ink/tastro"
 const { t } = useTastro(Astro.request)
 ---
 
-<Card style="width: 100%; height: 100%;">
+<Card class="glass-card" style="width: 100%; height: 100%;">
     <h4 slot="header">⚡ {t("skills.title")}</h4>
     <span style="display: inline-flex; flex-wrap: wrap; gap: 8px;">
-        <Badge label="NodeJS" color="mono" variant="flat"/>
+        <Badge label="NoneBot2" color="mono" variant="flat"/>
         <Badge label="Python" color="mono" variant="flat"/>
-        <Badge label="AstrBot" color="mono" variant="flat"/>
-        <Badge label="NapCat" color="mono" variant="flat"/>
-        <Badge label="Koishi" color="mono" variant="flat"/>
+        <Badge label="NodeJS" color="mono" variant="flat"/>
+        <Badge label="JavaScript" color="mono" variant="flat"/>
         <Badge label="Docker" color="mono" variant="flat"/>
+        <Badge label="Linux" color="mono" variant="flat"/>
+        <Badge label="小米穿戴" color="mono" variant="flat"/>
     </span>
 </Card>
