@@ -1,36 +1,34 @@
 ---
-import { Card } from "studiocms:ui/components/card";
-
 import { useTastro } from "@sipc.ink/tastro"
 const { t } = useTastro(Astro.request)
 ---
 
-<Card class="glass-card" style="width: 100%; height: 100%;">
-    <h4 slot="header">🛠️ {t("projects.title")}</h4>
-    <div style="display: flex; flex-direction: column; gap: 8px; height: 100%;">
-        <Card class="glass-card" style="width: 100%;">
-            <h5 slot="header">
+<div class="glass-card" style="width: 100%; height: 100%; padding: 20px; background: rgba(20, 20, 20, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08);">
+    <h4 style="margin-bottom: 12px; font-size: 16px;">🛠️ {t("projects.title")}</h4>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="padding: 12px; background: rgba(40, 40, 40, 0.5); border-radius: 12px;">
+            <h5 style="margin-bottom: 4px;">
                 <a href="https://docs.th-dd.top/thbot-commads.html" style="color: #ffffff; text-decoration: none;">{t("projects.project1.name")}</a>
             </h5>
             <p style="font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.4;">
                 {t("projects.project1.desc")}
             </p>
-        </Card>
-        <Card class="glass-card" style="width: 100%;">
-            <h5 slot="header">
+        </div>
+        <div style="padding: 12px; background: rgba(40, 40, 40, 0.5); border-radius: 12px;">
+            <h5 style="margin-bottom: 4px;">
                 <a href="https://docs.th-dd.top/nobot-commads.html" style="color: #ffffff; text-decoration: none;">{t("projects.project2.name")}</a>
             </h5>
             <p style="font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.4;">
                 {t("projects.project2.desc")}
             </p>
-        </Card>
-        <Card class="glass-card" style="width: 100%;">
-            <h5 slot="header">
+        </div>
+        <div style="padding: 12px; background: rgba(40, 40, 40, 0.5); border-radius: 12px;">
+            <h5 style="margin-bottom: 4px;">
                 <a href="https://docs.th-dd.top" style="color: #ffffff; text-decoration: none;">{t("projects.project3.name")}</a>
             </h5>
             <p style="font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.4;">
                 {t("projects.project3.desc")}
             </p>
-        </Card>
+        </div>
     </div>
-</Card>
+</div>
