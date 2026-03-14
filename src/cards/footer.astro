@@ -1,13 +1,11 @@
 ---
-import { Card } from "studiocms:ui/components/card";
-
 import { useTastro } from "@sipc.ink/tastro"
 const { t } = useTastro(Astro.request)
 ---
 
-<Card class="glass-card" style="width: 100%">
-    <div style="display: flex;align-items: center;justify-content: space-between;color: #808080;">
-        © {new Date().getFullYear()}
+<div class="glass-card" style="width: 100%; padding: 16px 20px; background: rgba(20, 20, 20, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08);">
+    <div style="display: flex; align-items: center; justify-content: space-between; color: #808080;">
+        <span>© {new Date().getFullYear()}</span>
         <a href="https://th-dd.top" style="color: inherit; text-decoration: none;">
             {t("footer.site")}
         </a>
@@ -15,4 +13,4 @@ const { t } = useTastro(Astro.request)
             {t("footer.font")}
         </a>
     </div>
-</Card>
+</div>
