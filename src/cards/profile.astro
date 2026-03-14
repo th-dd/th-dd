@@ -1,5 +1,4 @@
 ---
-import { Card } from "studiocms:ui/components/card";
 import { User } from "studiocms:ui/components/user";
 import ProfileImage from "../../public/avatar.jpg";
 
@@ -7,6 +6,6 @@ import { useTastro } from "@sipc.ink/tastro"
 const { t } = useTastro(Astro.request)
 ---
 
-<Card class="glass-card" style="width: 100%; min-height: 80px; display: flex; align-items: center; justify-content: center;">
+<div class="glass-card" style="width: 100%; min-height: 80px; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(20, 20, 20, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08);">
     <User name={t("profile.name")} description={t("profile.description")} avatar={ProfileImage} />
-</Card>
+</div>
