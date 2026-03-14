@@ -27,89 +27,8 @@ const { t, lang} = useTastro(Astro.request)
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>th-dd.top</title>
     <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Medium.min.css"/>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'MiSans', -apple-system, BlinkMacSystemFont, sans-serif;
-            min-height: 100vh;
-            background: #1a1a1a;
-            color: #ffffff;
-        }
-        
-        .background-image {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://api.yppp.net/api.php');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: 0;
-        }
-        
-        .background-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.15);
-            z-index: 1;
-        }
-        
-        .container {
-            max-width: 730px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-            position: relative;
-            z-index: 2;
-        }
-        
-        /* 毛玻璃效果 - 强制覆盖 */
-        .glass-card,
-        .glass-card *,
-        [class*="Card"] {
-            background: rgba(20, 20, 20, 0.65) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border-radius: 16px !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }
-        
-        /* 确保内容可见 */
-        .glass-card * {
-            color: #ffffff !important;
-        }
-        
-        .outer-grid {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 15px;
-            min-height: calc(100vh - 40px);
-        }
-        
-        .inner-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        
-        @media (max-width: 768px) {
-            .outer-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="background-image"></div>
     <div class="background-overlay"></div>
     <div class="container">
@@ -127,5 +46,85 @@ const { t, lang} = useTastro(Astro.request)
             </div>
         </div>
     </div>
-</body>
+  </body>
 </html>
+
+<style is:global>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    html, body {
+        font-family: 'MiSans', -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    
+    .background-image {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('https://api.yppp.net/api.php');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: 0;
+    }
+    
+    .background-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.15);
+        z-index: 1;
+    }
+    
+    .container {
+        max-width: 730px;
+        margin: 0 auto;
+        padding: 20px;
+        min-height: 100vh;
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* 毛玻璃效果 - 全局强制覆盖 */
+    div[class*="Card"],
+    div[class*="card"],
+    .glass-card,
+    article,
+    section[class*="card"] {
+        background: rgba(20, 20, 20, 0.65) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .outer-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 15px;
+        min-height: calc(100vh - 40px);
+    }
+    
+    .inner-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .outer-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
