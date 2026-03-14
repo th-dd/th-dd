@@ -1,6 +1,4 @@
 ---
-import { Badge } from "studiocms:ui/components/badge";
-
 import { useTastro } from "@sipc.ink/tastro"
 const { t } = useTastro(Astro.request)
 ---
@@ -8,12 +6,30 @@ const { t } = useTastro(Astro.request)
 <div class="glass-card" style="width: 100%; height: 100%; padding: 20px;">
     <h4 style="margin-bottom: 12px; font-size: 16px;">⚡ {t("skills.title")}</h4>
     <span style="display: inline-flex; flex-wrap: wrap; gap: 8px;">
-        <Badge label="NoneBot2" color="mono" variant="flat"/>
-        <Badge label="Python" color="mono" variant="flat"/>
-        <Badge label="NodeJS" color="mono" variant="flat"/>
-        <Badge label="JavaScript" color="mono" variant="flat"/>
-        <Badge label="Docker" color="mono" variant="flat"/>
-        <Badge label="Linux" color="mono" variant="flat"/>
-        <Badge label="小米穿戴" color="mono" variant="flat"/>
+        <span class="skill-badge">NoneBot2</span>
+        <span class="skill-badge">Python</span>
+        <span class="skill-badge">NodeJS</span>
+        <span class="skill-badge">JavaScript</span>
+        <span class="skill-badge">Docker</span>
+        <span class="skill-badge">Linux</span>
+        <span class="skill-badge">小米穿戴</span>
     </span>
 </div>
+
+<style>
+    .skill-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        background: rgba(128, 128, 128, 0.2);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+    
+    .skill-badge:hover {
+        background: rgba(128, 128, 128, 0.35);
+        transform: translateY(-2px);
+    }
+</style>
