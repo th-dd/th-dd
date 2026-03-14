@@ -2,57 +2,20 @@
 import { Card } from "studiocms:ui/components/card";
 
 import { useTastro } from "@sipc.ink/tastro"
-const { t,lang } = useTastro(Astro.request)
+const { t } = useTastro(Astro.request)
 ---
 
-<Card style="width: 100%;">
-    <h4 slot="header">🕒 {t("time.title")}</h4>
-    <div style="border-radius: 12px; background: rgba(0, 0, 0, 0.04); text-align: center;" id="time-card" data-lang={lang}>
-        <div id="date" style="font-size: 15px; opacity: 0.6; margin-bottom: 3px;">-</div>
-        <div id="clock" style="font-size: 28px; font-weight: 500; letter-spacing: 0.1em; transition: opacity 0.25s ease;">00:00:00</div>
+<Card class="glass-card" style="width: 100%; height: 100%;">
+    <h4 slot="header">⏰ {t("time.title")}</h4>
+    <div id="time-display" style="font-size: 2em; font-weight: bold; text-align: center;">
+        Loading...
     </div>
-
     <script>
-        const root = document.getElementById("time-card");
-        const LANG = root?.dataset.lang || "en";
-
-        function getUTC8Date() {
-            const now = new Date();
-            const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-            return new Date(utc + 8 * 60 * 60000);
-        }
-
         function updateTime() {
-            const now = getUTC8Date();
-
-            const date = now.toLocaleDateString(LANG, {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                weekday: "long",
-            });
-
-            const time = now.toLocaleTimeString(LANG, {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-            });
-
-            const dateEl = document.getElementById("date");
-            const clockEl = document.getElementById("clock");
-
-            if (dateEl && clockEl) {
-                dateEl.textContent = date;
-                clockEl.style.opacity = "0.5";
-                
-                setTimeout(() => {
-                    clockEl.textContent = time;
-                    clockEl.style.opacity = "1";
-                }, 150);
-            }
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('time-display').textContent = now.toLocaleTimeString('zh-CN', options);
         }
-
         updateTime();
         setInterval(updateTime, 1000);
     </script>
