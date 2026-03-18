@@ -103,6 +103,7 @@ const { t, lang} = useTastro(Astro.request)
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 20px;
     }
     
     .background-image {
@@ -133,7 +134,6 @@ const { t, lang} = useTastro(Astro.request)
         z-index: 2;
         max-width: 730px;
         width: 100%;
-        padding: 20px;
     }
     
     /* 主题切换按钮 */
@@ -235,11 +235,12 @@ const { t, lang} = useTastro(Astro.request)
         fill: var(--btn-text) !important;
     }
     
-    /* 布局 */
+    /* 布局 - 不拉伸 */
     .outer-grid {
         display: grid;
         grid-template-columns: 1fr 2fr;
         gap: 12px;
+        align-items: start;
     }
     
     .column-left,
