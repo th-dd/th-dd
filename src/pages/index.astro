@@ -10,7 +10,7 @@ import Projects from "../cards/projects.astro";
 import { initTastro, useTastro } from "@sipc.ink/tastro"
 
 initTastro({
-  defaultLang: "en",
+  defaultLang: "zh",
   languages: {
     en: () => import("../i18n/en.json"),
     zh: () => import("../i18n/zh.json"),
@@ -38,21 +38,21 @@ const { t, lang} = useTastro(Astro.request)
       <span class="icon-moon">🌙</span>
     </button>
     
-    <div class="container">
+    <main class="container">
         <div class="outer-grid">
-            <div class="inner-grid">
+            <div class="column-left">
                 <Profile />
                 <About />
                 <Skills />
                 <Links />
             </div>
-            <div class="inner-grid">
+            <div class="column-right">
                 <Time />
                 <Projects />
                 <Footer />
             </div>
         </div>
-    </div>
+    </main>
   </body>
 </html>
 
@@ -100,6 +100,9 @@ const { t, lang} = useTastro(Astro.request)
     body {
         background: var(--bg-primary);
         color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .background-image {
@@ -126,12 +129,11 @@ const { t, lang} = useTastro(Astro.request)
     }
     
     .container {
-        max-width: 730px;
-        margin: 0 auto;
-        padding: 20px;
-        min-height: 100vh;
         position: relative;
         z-index: 2;
+        max-width: 730px;
+        width: 100%;
+        padding: 20px;
     }
     
     /* 主题切换按钮 */
@@ -233,17 +235,18 @@ const { t, lang} = useTastro(Astro.request)
         fill: var(--btn-text) !important;
     }
     
+    /* 布局 */
     .outer-grid {
         display: grid;
         grid-template-columns: 1fr 2fr;
-        gap: 15px;
-        min-height: calc(100vh - 40px);
+        gap: 12px;
     }
     
-    .inner-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 15px;
+    .column-left,
+    .column-right {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
     }
     
     @media (max-width: 768px) {
