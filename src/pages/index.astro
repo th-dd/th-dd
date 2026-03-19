@@ -6,6 +6,7 @@ import About from "../cards/about.astro";
 import Time from "../cards/time.astro";
 import Skills from "../cards/skills.astro";
 import Projects from "../cards/projects.astro";
+import LinkDrawer from "../cards/LinkDrawer.astro";
 
 import { initTastro, useTastro } from "@sipc.ink/tastro"
 
@@ -53,7 +54,8 @@ const { t, lang} = useTastro(Astro.request)
             </div>
         </div>
     </main>
-  </body>
+      <LinkDrawer />
+</body>
 </html>
 
 <style is:global>
