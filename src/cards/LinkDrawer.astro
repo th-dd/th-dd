@@ -1,11 +1,10 @@
 ---
 // 链接预览抽屉组件
 const links = [
-    { name: "GitHub", url: "https://github.com/th-dd", icon: "github" },
-    { name: "Bilibili", url: "https://space.bilibili.com/1217732687", icon: "bilibili" },
-    { name: "QQ群", url: "https://qm.qq.com/q/jvHsCgdhg4", icon: "qq" },
-    { name: "文档站", url: "https://docs.th-dd.top", icon: "docs" },
-    { name: "服务器监控", url: "https://sys.th-dd.top", icon: "status" }
+    { name: "GitHub", url: "https://github.com/th-dd" },
+    { name: "Bilibili", url: "https://space.bilibili.com/1217732687" },
+    { name: "文档站", url: "https://docs.th-dd.top" },
+    { name: "服务器监控", url: "https://sys.th-dd.top" }
 ]
 ---
 
@@ -41,11 +40,8 @@ const links = [
         
         <!-- 控制栏 -->
         <div class="drawer-controls">
-            <button id="auto-play-btn" class="control-btn" title="自动轮播">
-                ▶️ 自动播放
-            </button>
             <button id="open-link-btn" class="control-btn" title="在新窗口打开">
-                🔗 打开链接
+                🔗 在新窗口打开
             </button>
         </div>
     </div>
@@ -55,7 +51,6 @@ const links = [
     .link-drawer {
         position: fixed;
         z-index: 99;
-        /* 电脑端右下角 */
         bottom: 20px;
         right: 20px;
     }
@@ -194,11 +189,6 @@ const links = [
         background: var(--btn-bg);
     }
     
-    .control-btn.playing {
-        background: var(--btn-bg);
-        border-color: var(--text-primary);
-    }
-    
     /* 手机端样式 */
     @media (max-width: 768px) {
         .link-drawer {
@@ -232,12 +222,9 @@ const links = [
     const tabs = document.querySelectorAll('.link-tab');
     const frame = document.getElementById('preview-frame');
     const placeholder = document.querySelector('.preview-placeholder');
-    const autoPlayBtn = document.getElementById('auto-play-btn');
     const openLinkBtn = document.getElementById('open-link-btn');
     
     let currentUrl = '';
-    let autoPlayInterval = null;
-    let currentIndex = 0;
     
     // 切换抽屉
     toggle.addEventListener('click', () => {
@@ -248,7 +235,6 @@ const links = [
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const url = tab.dataset.url;
-            const index = parseInt(tab.dataset.index);
             
             // 更新激活状态
             tabs.forEach(t => t.classList.remove('active'));
@@ -256,37 +242,10 @@ const links = [
             
             // 加载预览
             currentUrl = url;
-            currentIndex = index;
             frame.src = url;
             frame.classList.add('active');
             placeholder.classList.add('hidden');
         });
-    });
-    
-    // 自动播放
-    autoPlayBtn.addEventListener('click', () => {
-        if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
-            autoPlayInterval = null;
-            autoPlayBtn.classList.remove('playing');
-            autoPlayBtn.textContent = '▶️ 自动播放';
-        } else {
-            autoPlayBtn.classList.add('playing');
-            autoPlayBtn.textContent = '⏸️ 停止播放';
-            
-            // 确保抽屉打开
-            drawer.classList.add('open');
-            
-            autoPlayInterval = setInterval(() => {
-                currentIndex = (currentIndex + 1) % tabs.length;
-                tabs[currentIndex].click();
-            }, 5000);
-            
-            // 开始播放第一个
-            if (!frame.classList.contains('active')) {
-                tabs[0].click();
-            }
-        }
     });
     
     // 在新窗口打开链接
