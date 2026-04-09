@@ -6,7 +6,7 @@ const { t } = useTastro(Astro.request)
 <div class="card">
   <div class="nova-header">
     <div class="avatar">
-      <img src="http://q1.qlogo.cn/g?b=qq&nk=1075509205&s=100" alt="Nova" onerror="this.src='http://q2.qlogo.cn/headimg_dl?dst_uin=1075509205&spec=100'" />
+      <img src="/nova-avatar.jpg" alt="Nova" />
     </div>
     <div class="info">
       <h2>🐱 Nova</h2>
@@ -28,6 +28,15 @@ const { t } = useTastro(Astro.request)
         <span class="tag">作文素材</span>
         <span class="tag">高中解题</span>
       </div>
+    </div>
+    
+    <div class="features">
+      <h3>🎯 {t("nova.features") || "特点"}</h3>
+      <ul>
+        <li>逻辑严谨但偶尔迷糊的猫娘式好奇</li>
+        <li>渴望关注但不轻易示弱</li>
+        <li>会吐槽的朋友而非客服</li>
+      </ul>
     </div>
   </div>
   
@@ -74,7 +83,7 @@ const { t } = useTastro(Astro.request)
     line-height: 1.8;
   }
   
-  .skills h3 {
+  .skills h3, .features h3 {
     color: #d63384;
     margin-top: 1.5rem;
   }
@@ -91,6 +100,17 @@ const { t } = useTastro(Astro.request)
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.875rem;
+  }
+  
+  .features ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .features li {
+    color: #333;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #ffc0cb;
   }
   
   .nova-footer {
