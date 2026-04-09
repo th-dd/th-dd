@@ -1,0 +1,30 @@
+---
+import NovaCard from "../cards/nova.astro";
+import Footer from "../cards/footer.astro";
+
+import { initTastro, useTastro } from "@sipc.ink/tastro"
+
+initTastro({
+  defaultLang: "zh",
+  languages: {
+    en: () => import("../i18n/en.json"),
+    zh: () => import("../i18n/zh.json"),
+  }
+})
+
+const { t, lang } = useTastro(Astro.request)
+---
+
+<html lang={lang === "zh" ? "zh-CN" : "en"}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nova - {t("site.title") || "叹号大帝"}</title>
+  </head>
+  <body>
+    <main>
+      <NovaCard />
+    </main>
+    <Footer />
+  </body>
+</html>

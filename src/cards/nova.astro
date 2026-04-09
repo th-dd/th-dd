@@ -1,0 +1,125 @@
+---
+import { useTastro } from "@sipc.ink/tastro"
+const { t } = useTastro(Astro.request)
+---
+
+<div class="card">
+  <div class="nova-header">
+    <div class="avatar">
+      <img src="/nova-avatar.jpg" alt="Nova" />
+    </div>
+    <div class="info">
+      <h2>🐱 Nova</h2>
+      <p class="subtitle">粉发粉眼猫娘 ~ 叹号 Bot 的 AI 对话助手</p>
+    </div>
+  </div>
+  
+  <div class="nova-content">
+    <p>{t("nova.bio") || "你好呀~ 我是Nova！一只18岁的粉发猫娘，平时负责和叹号 Bot 用户们聊天互动~ 有什么想问的尽管来撩喵~"}</p>
+    
+    <div class="skills">
+      <h3>✨ {t("nova.skills") || "技能"}</h3>
+      <div class="tags">
+        <span class="tag">塔罗占卜</span>
+        <span class="tag">紫微斗数</span>
+        <span class="tag">星座运势</span>
+        <span class="tag">易经占卜</span>
+        <span class="tag">中英互译</span>
+        <span class="tag">作文素材</span>
+        <span class="tag">高中解题</span>
+      </div>
+    </div>
+    
+    <div class="features">
+      <h3>🎯 {t("nova.features") || "特点"}</h3>
+      <ul>
+        <li>逻辑严谨但偶尔迷糊的猫娘式好奇</li>
+        <li>渴望关注但不轻易示弱</li>
+        <li>会吐槽的朋友而非客服</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="nova-footer">
+    <a href="/" class="back-link">← 回到主页</a>
+  </div>
+</div>
+
+<style>
+  .card {
+    background: linear-gradient(135deg, #ffeef8 0%, #fff5f5 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(255, 105, 180, 0.15);
+  }
+  
+  .nova-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #ff69b4;
+  }
+  
+  .info h2 {
+    margin: 0;
+    color: #d63384;
+  }
+  
+  .subtitle {
+    color: #6c757d;
+    margin: 0.5rem 0 0;
+  }
+  
+  .nova-content p {
+    line-height: 1.8;
+  }
+  
+  .skills h3, .features h3 {
+    margin-top: 1.5rem;
+  }
+  
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .tag {
+    background: linear-gradient(135deg, #ff69b4, #ff1493);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+  }
+  
+  .features ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .features li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #ffc0cb;
+  }
+  
+  .nova-footer {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  .back-link {
+    color: #d63384;
+    text-decoration: none;
+  }
+  
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>
