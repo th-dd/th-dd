@@ -11,6 +11,8 @@
 - **QQ**: 3856150351
 - **QQ 跳转链接**: [点我](https://qm.qq.com/q/jvHsCgdhg4)
 
+![thdd GitHub Game](game.gif)
+
 ## 🔗 链接
 
 | 链接 | 地址 |
@@ -19,9 +21,3 @@
 | 📚 文档站 | [docs.th-dd.top](https://docs.th-dd.top) |
 | 📊 服务器监控 | [sys.th-dd.top](https://sys.th-dd.top) |
 | 💻 GitHub | [github.com/th-dd](https://github.com/th-dd) |
-
-## 🛠️ 项目
-
-- **叹号 Bot** - 娱乐型 Bot 无 AI 对话（多平台）
-- **Nova Bot** - QQ 机器人（偏群管型，有AI对话功能）
-- 更多项目请访问 [文档站](https://docs.th-dd.top)
