@@ -11,7 +11,7 @@
 - **QQ**: 3856150351
 - **QQ 跳转链接**: [点我](https://qm.qq.com/q/jvHsCgdhg4)
 
-![thdd GitHub Game](game.gif)
+![thdd GitHub Game](https://gh.llkk.cc/https://github.com/th-dd/th-dd/blob/main/game.gif)
 
 ## 🔗 链接
 
