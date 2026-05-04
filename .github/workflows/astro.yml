@@ -57,20 +57,17 @@ jobs:
             exit 1
           fi
 
-      # 修复核心Bug：必须先安装 pnpm，再安装 Node
       - name: Setup pnpm
         if: steps.detect-package-manager.outputs.manager == 'pnpm'
         uses: pnpm/action-setup@v6
         with:
           version: 11
 
-      # 逻辑优化：合并了原本分散的两次 setup-node 调用
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: "24"
-          # 如果是 pnpm，此值为空（走后面的独立缓存步骤）；如果是 npm/yarn，此处自动接管缓存
-          cache: ${{ steps.detect-package-manager.outputs.manager != 'pnpm' && steps.detect-package-manager.outputs.manager }}
+          cache: ${{ steps.detect-package-manager.outputs.manager != 'pnpm' && steps.detect-package-manager.outputs.manager || '' }}
           cache-dependency-path: ${{ env.BUILD_PATH }}/${{ steps.detect-package-manager.outputs.lockfile }}
 
       - name: Get pnpm store directory
