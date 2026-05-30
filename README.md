@@ -1,6 +1,6 @@
 # [th-dd](https://th-dd.top)
 
-[English](README.en.md) | 中文
+[English](README_en.md) | 简体中文
 
 > 你好 叹号大帝！
 
