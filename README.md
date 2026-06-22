@@ -9,7 +9,7 @@
 - **昵称**: 叹号大帝 / 叹号 / thdd
 - **QQ**: [3856150351](https://qm.qq.com/q/jvHsCgdhg4)
 
-![thdd GitHub Game](https://gh.llkk.cc/https://github.com/th-dd/th-dd/blob/main/game.gif)
+![thdd GitHub Game](https://gh-proxy.com/https://github.com/th-dd/th-dd/blob/main/game.gif)
 
 ## 🔗 链接
 
