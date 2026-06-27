@@ -4,3 +4,4 @@ allowBuilds:
   workerd: true
 minimumReleaseAgeExclude:
   - astro@6.4.7
+  - '@studiocms/ui@1.2.1'
