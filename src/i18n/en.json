@@ -8,26 +8,8 @@
     "old": "A person who loves to tinker",
     "content": "Mainly researching QQ bots (contact me if you need to create a group), Xiaomi wearables (Mitao Community), and other Xiaomi stuff 🤖📱"
   },
-  "skills": {
-    "title": "Skills"
-  },
   "links": {
     "title": "Links"
-  },
-  "projects": {
-    "title": "Projects",
-    "project1": {
-      "name": "TanHao Bot",
-      "desc": "A QQ bot based on NoneBot2 with various practical features"
-    },
-    "project2": {
-      "name": "Nova Bot",
-      "desc": "Another QQ bot project"
-    },
-    "project3": {
-      "name": "Personal Docs",
-      "desc": "Documenting various tinkering notes and project documentation"
-    }
   },
   "time": {
     "title": "Local Time"
