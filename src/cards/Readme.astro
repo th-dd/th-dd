@@ -1,17 +1,36 @@
 ---
 import { useTastro } from "@sipc.ink/tastro"
+import { marked } from "marked";
 const { t, lang } = useTastro(Astro.request)
 
-// 根据语言选择 README 文件
-const readmeUrl = lang === "zh" 
-    ? "https://raw.githubusercontent.com/th-dd/th-dd/main/README.md"
-    : "https://raw.githubusercontent.com/th-dd/th-dd/main/README_en.md"
+// 配置 marked
+marked.setOptions({
+    breaks: true,
+    gfm: true
+});
+
+// 根据语言选择 README 文件名
+const readmeFile = lang === "zh" ? "README.md" : "README_en.md"
+
+// 多个镜像源，按优先级排序（国内可访问的优先）
+const readmeSources = [
+    `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${readmeFile}`,
+    `https://gitee.com/ya2/ya2/raw/main/${readmeFile}`,
+    `https://raw.staticdn.net/th-dd/th-dd/main/${readmeFile}`,
+    `https://raw.githubusercontent.com/th-dd/th-dd/main/${readmeFile}`
+];
 ---
 
 <div class="glass-card readme-card">
-    <h4 class="readme-title">📖 {lang === "zh" ? "README" : "README"}</h4>
+    <div class="readme-header">
+        <h4 class="readme-title">📖 README</h4>
+        <span class="readme-lang-badge">{lang === "zh" ? "中文" : "EN"}</span>
+    </div>
     <div id="readme-content" class="readme-content">
-        <div class="readme-loading">{lang === "zh" ? "加载中..." : "Loading..."}</div>
+        <div class="readme-loading">
+            <span class="loading-spinner"></span>
+            <span>{lang === "zh" ? "加载中..." : "Loading..."}</span>
+        </div>
     </div>
 </div>
 
@@ -21,15 +40,31 @@ const readmeUrl = lang === "zh"
         padding: 20px;
     }
     
-    .readme-title {
+    .readme-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         margin-bottom: 16px;
+    }
+    
+    .readme-title {
         font-size: 16px;
         color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .readme-lang-badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: var(--btn-bg);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
     }
     
     .readme-content {
         font-size: 14px;
-        line-height: 1.6;
+        line-height: 1.7;
         color: var(--text-secondary);
         max-height: 500px;
         overflow-y: auto;
@@ -37,30 +72,64 @@ const readmeUrl = lang === "zh"
     }
     
     .readme-loading {
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
         color: var(--text-muted);
-        padding: 20px;
+        padding: 40px 20px;
     }
     
-    /* Markdown 样式 */
+    .loading-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--border-color);
+        border-top-color: var(--text-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Markdown 渲染样式 */
     .readme-content :global(h1) {
         font-size: 1.5em;
-        margin: 16px 0 8px;
+        margin: 20px 0 10px;
         color: var(--text-primary);
         border-bottom: 1px solid var(--border-color);
         padding-bottom: 8px;
+        font-weight: 700;
     }
     
     .readme-content :global(h2) {
-        font-size: 1.25em;
-        margin: 16px 0 8px;
+        font-size: 1.3em;
+        margin: 18px 0 8px;
         color: var(--text-primary);
+        font-weight: 600;
     }
     
     .readme-content :global(h3) {
-        font-size: 1.1em;
+        font-size: 1.15em;
+        margin: 14px 0 6px;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .readme-content :global(h4) {
+        font-size: 1em;
         margin: 12px 0 6px;
         color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .readme-content :global(h5),
+    .readme-content :global(h6) {
+        font-size: 0.9em;
+        margin: 10px 0 4px;
+        color: var(--text-primary);
+        font-weight: 600;
     }
     
     .readme-content :global(p) {
@@ -71,31 +140,51 @@ const readmeUrl = lang === "zh"
     .readme-content :global(a) {
         color: #58a6ff;
         text-decoration: none;
+        transition: color 0.2s;
     }
     
     .readme-content :global(a:hover) {
         text-decoration: underline;
+        color: #79c0ff;
+    }
+    
+    .readme-content :global(strong) {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+    
+    .readme-content :global(em) {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+    
+    .readme-content :global(del) {
+        color: var(--text-muted);
     }
     
     .readme-content :global(code) {
         background: var(--btn-bg);
         padding: 2px 6px;
         border-radius: 4px;
-        font-family: 'SFMono-Regular', Consolas, monospace;
-        font-size: 0.9em;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        font-size: 0.88em;
+        color: #f0883e;
     }
     
     .readme-content :global(pre) {
         background: var(--bg-card-inner);
-        padding: 12px;
+        padding: 14px;
         border-radius: 8px;
         overflow-x: auto;
-        margin: 8px 0;
+        margin: 10px 0;
+        border: 1px solid var(--border-color);
     }
     
     .readme-content :global(pre code) {
         background: transparent;
         padding: 0;
+        color: var(--text-primary);
+        font-size: 0.85em;
     }
     
     .readme-content :global(ul),
@@ -109,17 +198,29 @@ const readmeUrl = lang === "zh"
         color: var(--text-secondary);
     }
     
+    .readme-content :global(li input[type="checkbox"]) {
+        margin-right: 6px;
+    }
+    
     .readme-content :global(blockquote) {
         border-left: 3px solid var(--border-color);
-        padding-left: 12px;
-        margin: 8px 0;
+        padding: 4px 12px;
+        margin: 10px 0;
         color: var(--text-muted);
+        background: var(--btn-bg);
+        border-radius: 0 6px 6px 0;
+    }
+    
+    .readme-content :global(blockquote p) {
+        margin: 4px 0;
     }
     
     .readme-content :global(table) {
         border-collapse: collapse;
         width: 100%;
         margin: 12px 0;
+        display: block;
+        overflow-x: auto;
     }
     
     .readme-content :global(th),
@@ -132,6 +233,11 @@ const readmeUrl = lang === "zh"
     .readme-content :global(th) {
         background: var(--btn-bg);
         color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .readme-content :global(td) {
+        color: var(--text-secondary);
     }
     
     .readme-content :global(img) {
@@ -149,6 +255,7 @@ const readmeUrl = lang === "zh"
     /* 滚动条样式 */
     .readme-content::-webkit-scrollbar {
         width: 6px;
+        height: 6px;
     }
     
     .readme-content::-webkit-scrollbar-track {
@@ -166,146 +273,53 @@ const readmeUrl = lang === "zh"
 </style>
 
 <script>
-    // 简单的 Markdown 解析器
-    function parseMarkdown(md) {
-        // 转义 HTML
-        let html = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        
-        // 标题
-        html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-        html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-        
-        // 粗体和斜体
-        html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-        
-        // 行内代码
-        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-        
-        // 链接 [text](url)
-        html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-        
-        // 图片 ![alt](url)
-        html = html.replace(/!\[([^\]]*)\]\(([^\)]+)\)/g, '<img src="$2" alt="$1">');
-        
-        // 引用
-        html = html.replace(/^&gt; (.*$)/gim, '<blockquote>$1</blockquote>');
-        
-        // 水平线
-        html = html.replace(/^---$/gim, '<hr>');
-        
-        // 表格
-        const lines = html.split('\n');
-        let result = [];
-        let inTable = false;
-        let tableRows = [];
-        
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
-                if (!inTable) {
-                    inTable = true;
-                    tableRows = [];
-                }
-                tableRows.push(line);
-            } else {
-                if (inTable) {
-                    // 处理表格
-                    if (tableRows.length >= 2) {
-                        let table = '<table>';
-                        // 表头
-                        const headers = tableRows[0].split('|').filter(c => c.trim());
-                        table += '<thead><tr>';
-                        headers.forEach(h => {
-                            table += `<th>${h.trim()}</th>`;
-                        });
-                        table += '</tr></thead><tbody>';
-                        // 表格内容（跳过分隔行）
-                        for (let j = 2; j < tableRows.length; j++) {
-                            const cells = tableRows[j].split('|').filter(c => c.trim());
-                            table += '<tr>';
-                            cells.forEach(c => {
-                                table += `<td>${c.trim()}</td>`;
-                            });
-                            table += '</tr>';
-                        }
-                        table += '</tbody></table>';
-                        result.push(table);
-                    }
-                    inTable = false;
-                    tableRows = [];
-                }
-                result.push(line);
-            }
-        }
-        
-        // 处理最后的表格
-        if (inTable && tableRows.length >= 2) {
-            let table = '<table>';
-            const headers = tableRows[0].split('|').filter(c => c.trim());
-            table += '<thead><tr>';
-            headers.forEach(h => {
-                table += `<th>${h.trim()}</th>`;
-            });
-            table += '</tr></thead><tbody>';
-            for (let j = 2; j < tableRows.length; j++) {
-                const cells = tableRows[j].split('|').filter(c => c.trim());
-                table += '<tr>';
-                cells.forEach(c => {
-                    table += `<td>${c.trim()}</td>`;
-                });
-                table += '</tr>';
-            }
-            table += '</tbody></table>';
-            result.push(table);
-        }
-        
-        html = result.join('\n');
-        
-        // 列表
-        html = html.replace(/^(\d+\. .+)(\n\d+\. .+)*/gim, function(match) {
-            const items = match.split('\n').map(line => 
-                '<li>' + line.replace(/^\d+\. /, '') + '</li>'
-            ).join('');
-            return '<ol>' + items + '</ol>';
-        });
-        
-        html = html.replace(/^[-*] (.+)(\n[-*] .+)*/gim, function(match) {
-            const items = match.split('\n').map(line => 
-                '<li>' + line.replace(/^[-*] /, '') + '</li>'
-            ).join('');
-            return '<ul>' + items + '</ul>';
-        });
-        
-        // 段落
-        html = html.split('\n\n').map(block => {
-            if (block.match(/^<(h[1-6]|ul|ol|pre|blockquote|table|hr)/)) {
-                return block;
-            }
-            return '<p>' + block.replace(/\n/g, '<br>') + '</p>';
-        }).join('\n');
-        
-        return html;
-    }
-    
+    // 多镜像源 fallback 加载
     async function loadReadme() {
         const contentEl = document.getElementById('readme-content');
         const lang = document.documentElement.lang;
-        const url = lang === 'zh' || lang === 'zh-CN'
-            ? 'https://raw.githubusercontent.com/th-dd/th-dd/main/README.md'
-            : 'https://raw.githubusercontent.com/th-dd/th-dd/main/README_en.md';
+        const file = (lang === 'zh' || lang === 'zh-CN') ? 'README.md' : 'README_en.md';
         
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Failed to fetch README');
-            const md = await response.text();
-            contentEl.innerHTML = parseMarkdown(md);
-        } catch (error) {
-            contentEl.innerHTML = '<p>Failed to load README. Please visit <a href="https://github.com/th-dd/th-dd" target="_blank">GitHub</a> directly.</p>';
-            console.error('README load error:', error);
+        const sources = [
+            `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${file}`,
+            `https://gitee.com/ya2/ya2/raw/main/${file}`,
+            `https://raw.staticdn.net/th-dd/th-dd/main/${file}`,
+            `https://raw.githubusercontent.com/th-dd/th-dd/main/${file}`
+        ];
+        
+        let lastError = null;
+        
+        for (let i = 0; i < sources.length; i++) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch(sources[i], { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const md = await response.text();
+                    if (md && md.length > 0) {
+                        // 使用 marked 解析 markdown
+                        const html = marked.parse(md);
+                        contentEl.innerHTML = html;
+                        return;
+                    }
+                }
+            } catch (error) {
+                lastError = error;
+                console.warn(`Source ${i + 1} failed:`, sources[i], error.message);
+                // 继续尝试下一个源
+            }
         }
+        
+        // 所有源都失败
+        contentEl.innerHTML = `
+            <div style="text-align:center; padding:30px 20px; color:var(--text-muted);">
+                <p style="margin-bottom:12px;">⚠️ README 加载失败</p>
+                <p style="font-size:12px;">请直接访问 <a href="https://github.com/th-dd/th-dd" target="_blank" style="color:#58a6ff;">GitHub 仓库</a> 查看</p>
+            </div>
+        `;
+        console.error('All README sources failed. Last error:', lastError);
     }
     
     loadReadme();
