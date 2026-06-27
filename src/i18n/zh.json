@@ -8,26 +8,8 @@
     "old": "一个喜欢折腾的人",
     "content": "喜欢研究 AI Agent 机器人，小米穿戴设备（米坛社区）和小米的一些东西等 "
   },
-  "skills": {
-    "title": "技能"
-  },
   "links": {
     "title": "链接"
-  },
-  "projects": {
-    "title": "我の一些项目",
-    "project1": {
-      "name": "服务器监控",
-      "desc": "https://sys.th-dd.top"
-    },
-    "project2": {
-      "name": "小米穿戴固件分享",
-      "desc": "Q群 米坛の名办小窝"
-    },
-    "project3": {
-      "name": "个人文档站",
-      "desc": "记录各种折腾笔记和项目文档 https://docs.th-dd.top"
-    }
   },
   "time": {
     "title": "所在地时间"
