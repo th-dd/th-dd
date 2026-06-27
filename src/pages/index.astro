@@ -26,7 +26,15 @@ const { t, lang} = useTastro(Astro.request)
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{lang === "zh" ? "叹号大帝" : "thdd"}</title>
-    <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/misans@4.1.0/lib/Normal/MiSans-Medium.min.css"/>
+    <style is:global>
+      @font-face {
+        font-family: 'AaCute';
+        src: url('/AaCute.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
   </head>
   <body>
     <div class="background-image"></div>
