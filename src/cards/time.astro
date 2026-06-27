@@ -3,18 +3,39 @@ import { useTastro } from "@sipc.ink/tastro"
 const { t } = useTastro(Astro.request)
 ---
 
-<div class="glass-card" style="width: 100%; height: 100%; padding: 20px;">
-    <h4 style="margin-bottom: 12px; font-size: 16px;">⏰ {t("time.title")}</h4>
-    <div id="time-display" style="font-size: 2em; font-weight: bold; text-align: center;">
-        Loading...
-    </div>
-    <script>
-        function updateTime() {
-            const now = new Date();
-            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-            document.getElementById('time-display').textContent = now.toLocaleTimeString('zh-CN', options);
-        }
-        updateTime();
-        setInterval(updateTime, 1000);
-    </script>
+<div class="glass-card time-card">
+    <span class="time-icon">⏰</span>
+    <span id="time-display" class="time-text">Loading...</span>
 </div>
+
+<style>
+    .time-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        width: 100%;
+        font-size: 14px;
+    }
+    
+    .time-icon {
+        font-size: 14px;
+    }
+    
+    .time-text {
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        color: var(--text-primary);
+    }
+</style>
+
+<script>
+    function updateTime() {
+        const now = new Date();
+        const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        document.getElementById('time-display').textContent = now.toLocaleTimeString('zh-CN', options);
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+</script>
