@@ -2,7 +2,7 @@
 
 English | [简体中文](README.md)
 
-> Hello, Emperor Exclamation!
+> Hello, thdd!
 
 ## 👤 About Me
 
@@ -18,3 +18,7 @@ English | [简体中文](README.md)
 | 🏠 Homepage | [th-dd.top](https://th-dd.top) |
 | 📚 Documentation | [docs.th-dd.top](https://docs.th-dd.top) |
 | 💻 GitHub | [th-dd](https://github.com/th-dd) |
+
+---
+
+[![GitHub Roast](https://githubroast.icu/api/card/th-dd)](https://githubroast.icu/u/th-dd)

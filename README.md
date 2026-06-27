@@ -18,3 +18,7 @@
 | 🏠 个人主页 | [th-dd.top](https://th-dd.top) |
 | 📚 文档站 | [docs.th-dd.top](https://docs.th-dd.top) |
 | 💻 GitHub | [th-dd](https://github.com/th-dd) |
+
+---
+
+[![GitHub Roast](https://githubroast.icu/api/card/th-dd)](https://githubroast.icu/u/th-dd)
