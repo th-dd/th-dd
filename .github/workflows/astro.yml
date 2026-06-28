@@ -33,6 +33,16 @@ jobs:
           node-version: 24
           cache: "pnpm"
 
+      - name: Cache dependencies
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}-
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
