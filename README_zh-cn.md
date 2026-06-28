@@ -1,22 +1,22 @@
 # [th-dd](https://th-dd.top)
 
-English | [简体中文](README.md)
+[English](README_en.md) | 简体中文
 
-> Hello, thdd!
+> 你好 叹号大帝！
 
-## 👤 About Me
+## 👤 关于我
 
-- **Nickname**: Emperor Exclamation / Exclamation / thdd
+- **昵称**: 叹号大帝 / 叹号 / thdd
 - **QQ**: [3856150351](https://qm.qq.com/q/jvHsCgdhg4)
 
 ![thdd GitHub Game](https://gh-proxy.com/https://github.com/th-dd/th-dd/blob/main/game.gif)
 
-## 🔗 Links
+## 🔗 链接
 
-| Link | URL |
-|------|-----|
-| 🏠 Homepage | [th-dd.top](https://th-dd.top) |
-| 📚 Documentation | [docs.th-dd.top](https://docs.th-dd.top) |
+| 链接 | 地址 |
+|------|------|
+| 🏠 个人主页 | [th-dd.top](https://th-dd.top) |
+| 📚 文档站 | [docs.th-dd.top](https://docs.th-dd.top) |
 | 💻 GitHub | [th-dd](https://github.com/th-dd) |
 
 ---
