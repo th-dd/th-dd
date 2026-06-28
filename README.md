@@ -6,7 +6,7 @@ English | [简体中文](README.md)
 
 ## 👤 About Me
 
-- **Nickname**: Emperor Exclamation / Exclamation / thdd
+- **Nickname**: thdd
 - **QQ**: [3856150351](https://qm.qq.com/q/jvHsCgdhg4)
 
 ![thdd GitHub Game](https://gh-proxy.com/https://github.com/th-dd/th-dd/blob/main/game.gif)
