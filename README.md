@@ -1,7 +1,5 @@
 # [th-dd](https://th-dd.top)
 
-English | [简体中文](README.md)
-
 > Hello, thdd!
 
 ## 👤 About Me

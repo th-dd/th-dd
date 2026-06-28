@@ -1,7 +1,5 @@
 # [th-dd](https://th-dd.top)
 
-[English](README_en.md) | 简体中文
-
 > 你好 叹号大帝！
 
 ## 👤 关于我
