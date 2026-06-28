@@ -13,12 +13,12 @@ marked.setOptions({
 // 根据语言选择 README 文件名
 const readmeFile = lang === "zh" ? "README_zh-cn.md" : "README.md";
 
-// 多个镜像源，按优先级排序
+// 多个镜像源，按优先级排序（将内容最新的源提到最前面）
 const readmeSources = [
-    `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${readmeFile}`,
-    `https://gitee.com/ya2/ya2/raw/main/${readmeFile}`,
-    `https://raw.staticdn.net/th-dd/th-dd/main/${readmeFile}`,
-    `https://raw.githubusercontent.com/th-dd/th-dd/main/${readmeFile}`
+    `https://raw.githubusercontent.com/th-dd/th-dd/main/${readmeFile}`,  // 1. GitHub raw (内容最新)
+    `https://gitee.com/ya2/ya2/raw/main/${readmeFile}`,                  // 2. Gitee 镜像 (内容最新)
+    `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${readmeFile}`,        // 3. jsDelivr CDN (有缓存，作为备用)
+    // `https://raw.staticdn.net/th-dd/th-dd/main/${readmeFile}`         // 4. staticdn (打不开，已注释)
 ];
 
 let readmeHtml = null;
