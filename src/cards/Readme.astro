@@ -43,20 +43,26 @@ for (const url of readmeSources) {
 ---
 
 <div class="glass-card readme-card">
-    <div class="readme-header">
+    <div class="readme-header" id="readme-toggle">
         <h4 class="readme-title">📖 README</h4>
-        <span class="readme-lang-badge">{lang === "zh" ? "中文" : "EN"}</span>
+        <button class="toggle-btn" id="readme-toggle-btn" aria-label="切换 README 显示">
+            <svg class="toggle-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </button>
     </div>
-    <div class="readme-content">
-        {readmeHtml ? (
-            <div set:html={readmeHtml} />
-        ) : (
-            <div style="text-align:center; padding:30px 20px; color:var(--text-muted);">
-                <p style="margin-bottom:12px;">⚠️ README 加载失败</p>
-                <p style="font-size:12px;">请直接访问 <a href="https://github.com/th-dd/th-dd" target="_blank" style="color:#58a6ff;">GitHub 仓库</a> 查看</p>
-                {loadError && <p style="font-size:11px; margin-top:8px; opacity:0.6;">错误信息: {loadError}</p>}
-            </div>
-        )}
+    <div class="readme-content-wrapper" id="readme-content-wrapper">
+        <div class="readme-content">
+            {readmeHtml ? (
+                <div set:html={readmeHtml} />
+            ) : (
+                <div style="text-align:center; padding:30px 20px; color:var(--text-muted);">
+                    <p style="margin-bottom:12px;">⚠️ README 加载失败</p>
+                    <p style="font-size:12px;">请直接访问 <a href="https://github.com/th-dd/th-dd" target="_blank" style="color:#58a6ff;">GitHub 仓库</a> 查看</p>
+                    {loadError && <p style="font-size:11px; margin-top:8px; opacity:0.6;">错误信息: {loadError}</p>}
+                </div>
+            )}
+        </div>
     </div>
 </div>
 
@@ -71,21 +77,65 @@ for (const url of readmeSources) {
         align-items: center;
         justify-content: space-between;
         margin-bottom: 16px;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .readme-header:hover .toggle-btn {
+        opacity: 0.8;
     }
     
     .readme-title {
         font-size: 16px;
         color: var(--text-primary);
         margin: 0;
+        flex: 1;
     }
     
-    .readme-lang-badge {
-        font-size: 11px;
-        padding: 2px 8px;
-        border-radius: 10px;
-        background: var(--btn-bg);
+    .toggle-btn {
+        background: none;
+        border: none;
         color: var(--text-secondary);
-        border: 1px solid var(--border-color);
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.6;
+    }
+    
+    .toggle-btn:hover {
+        background: var(--btn-bg);
+        opacity: 1;
+    }
+    
+    .toggle-btn:focus-visible {
+        outline: 2px solid var(--text-primary);
+        outline-offset: 2px;
+    }
+    
+    .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .toggle-icon.collapsed {
+        transform: rotate(-90deg);
+    }
+    
+    .readme-content-wrapper {
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+        max-height: 600px;
+        opacity: 1;
+    }
+    
+    .readme-content-wrapper.collapsed {
+        max-height: 0 !important;
+        opacity: 0;
+        padding-top: 0;
+        margin-top: 0;
     }
     
     .readme-content {
@@ -95,6 +145,7 @@ for (const url of readmeSources) {
         max-height: 500px;
         overflow-y: auto;
         padding-right: 8px;
+        padding-top: 4px;
     }
     
     /* Markdown 渲染样式 */
@@ -275,3 +326,42 @@ for (const url of readmeSources) {
         background: var(--text-muted);
     }
 </style>
+
+<script>
+    (function() {
+        const toggleBtn = document.getElementById('readme-toggle-btn');
+        const wrapper = document.getElementById('readme-content-wrapper');
+        const icon = toggleBtn?.querySelector('.toggle-icon');
+        
+        if (!toggleBtn || !wrapper) return;
+        
+        // 从 localStorage 读取折叠状态
+        const isCollapsed = localStorage.getItem('readme-collapsed') === 'true';
+        
+        // 应用初始状态
+        if (isCollapsed) {
+            wrapper.classList.add('collapsed');
+            icon?.classList.add('collapsed');
+        }
+        
+        // 点击切换
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const willCollapse = !wrapper.classList.contains('collapsed');
+            
+            wrapper.classList.toggle('collapsed');
+            icon?.classList.toggle('collapsed');
+            
+            // 保存状态到 localStorage
+            localStorage.setItem('readme-collapsed', String(willCollapse));
+        });
+        
+        // 点击整个 header 也可以触发
+        const header = document.getElementById('readme-toggle');
+        header?.addEventListener('click', function(e) {
+            // 如果点击的是按钮本身，按钮的 click 事件已经处理了
+            if (e.target.closest('.toggle-btn')) return;
+            toggleBtn.click();
+        });
+    })();
+</script>
