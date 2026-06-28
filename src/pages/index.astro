@@ -1,6 +1,6 @@
 ---
 import Profile from "../cards/profile.astro";
-import Links from "../cards/links.astro";
+// import Links from "../cards/links.astro";  // <--- 注释：移除链接卡片
 import Footer from "../cards/footer.astro";
 import About from "../cards/about.astro";
 import Time from "../cards/time.astro";
@@ -52,7 +52,7 @@ const { t, lang} = useTastro(Astro.request)
                 <Profile />
                 <Time />
                 <About />
-                <Links />
+                {/* <Links /> */}  {/* <--- 注释：移除链接卡片 */}
             </div>
             <div class="column-right">
                 <Readme />
