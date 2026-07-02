@@ -19,4 +19,4 @@
 
 ---
 
-[![GitHub Roast](https://githubroast.icu/api/card/th-dd)](https://githubroast.icu/u/th-dd)
+[![GitHub Roast](https://ghfind.com/api/card/th-dd?theme=dark&variant=path)](https://ghfind.com/u/th-dd)
