@@ -24,4 +24,4 @@ jobs:
           strategy: 'random'
           no-amend: true
           fps: 60
-          commit-message: 'chore: update space shooter game GIF'
+          commit-message: 'chore: update gh space shooter game'
