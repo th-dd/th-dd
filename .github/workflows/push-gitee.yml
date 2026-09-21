@@ -1,45 +1,48 @@
-name: 推送代码到Gitee
+name: Sync to Gitee
 
 on:
+  schedule:
+    - cron: '0 8 * * *'
   push:
     branches:
       - main
   workflow_dispatch:
 
 jobs:
-  sync:
+  sync-th-dd:
+    name: Sync th-dd
     runs-on: ubuntu-latest
     steps:
-      - name: 拉取代码
-        uses: actions/checkout@v7
+      - name: Mirror th-dd
+        uses: Yikun/hub-mirror-action@ba51c01b28a6c9f95a25d4f1bcf6af2a147c0e18
         with:
-          fetch-depth: 0
+          src: github/th-dd
+          dst: gitee/ya2
+          src_account_type: user
+          dst_account_type: user
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          src_token: ${{ secrets.SRC_TOKEN }}
+          static_list: "th-dd,npmjs-chinese"
+          cache_path: hub-mirror-cache
+          timeout: '30m'
+          debug: true
 
-      - name: 配置 SSH 密钥
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.GITEE_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan gitee.com >> ~/.ssh/known_hosts
-          cat >> ~/.ssh/config <<EOF
-          Host gitee.com
-            HostName gitee.com
-            User git
-            ServerAliveInterval 30
-            ServerAliveCountMax 10
-            ConnectTimeout 30
-          EOF
-
-      - name: 推送到 Gitee
-        run: |
-          git remote add gitee git@gitee.com:ya2/ya2.git
-          for i in 1 2 3; do
-            if git push gitee main --force; then
-              echo "✅ Push succeeded on attempt $i"
-              exit 0
-            fi
-            echo "⚠️ Attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
-          echo "❌ All attempts failed"
-          exit 1
+  sync-thTag:
+    name: Sync thTag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirror thTag
+        uses: Yikun/hub-mirror-action@ba51c01b28a6c9f95a25d4f1bcf6af2a147c0e18
+        with:
+          src: github/thTag
+          dst: gitee/ya2
+          src_account_type: org
+          dst_account_type: user
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          src_token: ${{ secrets.SRC_TOKEN }}
+          static_list: "docs"
+          cache_path: hub-mirror-cache
+          timeout: '30m'
+          debug: true
