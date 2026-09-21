@@ -9,7 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.3.1",
+    "@astrojs/cloudflare": "^14.3.2",
     "@sipc.ink/tastro": "^0.1.6",
     "@studiocms/ui": "^1.2.2",
     "astro": "^7.3.3",
