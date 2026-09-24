@@ -2,11 +2,17 @@ name: Sync to Gitee
 
 on:
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '0 16 * * *'
   push:
     branches:
       - main
+    paths:
+      - '.github/workflows/sync-to-gitee.yml'
   workflow_dispatch:
+
+concurrency:
+  group: sync-to-gitee
+  cancel-in-progress: false
 
 jobs:
   sync-th-dd:
@@ -20,13 +26,14 @@ jobs:
           dst: gitee/ya2
           src_account_type: user
           dst_account_type: user
-          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
-          src_token: ${{ secrets.SRC_TOKEN }}
+          dst_key: ${{ secrets.GITEE_SSH }}
+          dst_token: ${{ secrets.GITEE_PAT }}
+          src_token: ${{ secrets.GH_PAT }}
           static_list: "th-dd,npmjs-chinese"
+          mappings: "th-dd=>ya2"
+          force_update: true
           cache_path: hub-mirror-cache
           timeout: '30m'
-          debug: true
 
   sync-thTag:
     name: Sync thTag
@@ -39,10 +46,10 @@ jobs:
           dst: gitee/ya2
           src_account_type: org
           dst_account_type: user
-          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token: ${{ secrets.GITEE_TOKEN }}
-          src_token: ${{ secrets.SRC_TOKEN }}
+          dst_key: ${{ secrets.GITEE_SSH }}
+          dst_token: ${{ secrets.GITEE_PAT }}
+          src_token: ${{ secrets.GH_PAT }}
           static_list: "docs"
+          force_update: true
           cache_path: hub-mirror-cache
           timeout: '30m'
-          debug: true
