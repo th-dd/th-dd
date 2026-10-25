@@ -7,15 +7,15 @@
 - **昵称**: 叹号
 - **QQ**: [3856150351](https://qm.qq.com/q/jvHsCgdhg4)
 
-![thdd GitHub Game](https://gh-proxy.com/https://github.com/th-dd/th-dd/raw/refs/heads/main/game.webp)
+![thdd GitHub Game](https://gh-proxy.com/https://github.com/th-dd/th-dd/raw/refs/heads/main/public/game.webp)
 
-## 📊 GitHub 统计
+## 📊 GitHub 状态
 
-![GitHub 统计](https://github-stats.mintimate.cn/api?username=th-dd&theme=transparent&show_icons=true&locale=cn&hide=issues)
+[![github stats](https://github-stats.mintimate.cn/api?username=th-dd&theme=transparent&show_icons=true)](https://github.com/th-dd)
 
 ## 🧊 3D 贡献图
 
-![3D Contribution Graph](./public/profile-night-rainbow.svg)
+![3D Contribution Graph](https://gh-proxy.com/https://github.com/th-dd/th-dd/raw/refs/heads/main/public/profile-night-rainbow.svg)
 
 ## 🔗 链接
 
