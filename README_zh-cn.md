@@ -27,4 +27,4 @@
 
 ---
 
-[![GitHub Roast](https://ghfind.com/api/card/th-dd?theme=dark&variant=path)](https://ghfind.com/u/th-dd)
+[![GitHub Roast](https://ghfind.com/api/card/th-dd?theme=dark&variant=path&qr=1)](https://ghfind.com/u/th-dd?ref=badge)
