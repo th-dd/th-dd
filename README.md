@@ -9,6 +9,14 @@
 
 ![thdd GitHub Game](https://github.com/th-dd/th-dd/raw/refs/heads/main/game.webp)
 
+## 📊 GitHub Stats
+
+![GitHub Stats](https://github-stats.mintimate.cn/api?username=th-dd&theme=transparent&show_icons=true&locale=cn&hide=issues)
+
+## 🧊 3D Contribution Graph
+
+![3D Contribution Graph](./public/profile-night-rainbow.svg)
+
 ## 🔗 Links
 
 | Link | URL |

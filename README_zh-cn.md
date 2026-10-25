@@ -9,6 +9,14 @@
 
 ![thdd GitHub Game](https://gh-proxy.com/https://github.com/th-dd/th-dd/raw/refs/heads/main/game.webp)
 
+## 📊 GitHub 统计
+
+![GitHub 统计](https://github-stats.mintimate.cn/api?username=th-dd&theme=transparent&show_icons=true&locale=cn&hide=issues)
+
+## 🧊 3D 贡献图
+
+![3D Contribution Graph](./public/profile-night-rainbow.svg)
+
 ## 🔗 链接
 
 | 链接 | 地址 |

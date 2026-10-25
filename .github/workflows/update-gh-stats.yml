@@ -1,0 +1,47 @@
+name: Update GitHub Game & 3D Contrib
+
+on:
+  schedule:
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+          ref: main
+
+      - uses: czl9707/gh-space-shooter@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-path: 'public/game.webp'
+          strategy: 'random'
+          no-commit: true
+          fps: 40
+
+      - uses: yoshi389111/github-profile-3d-contrib@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.repository_owner }}
+
+      - name: Move 3D contrib SVG to public/
+        run: |
+          mkdir -p public
+          if [ -d profile-3d-contrib ]; then
+            mv profile-3d-contrib/*.svg public/ 2>/dev/null || true
+            rm -rf profile-3d-contrib
+          fi
+
+      - name: Commit & Push remaining assets
+        uses: IAreKyleW00t/verified-bot-commit@v2
+        with:
+          message: "chore: update game and 3D contrib"
+          files: |
+            public/**
+            !public/.gitkeep
