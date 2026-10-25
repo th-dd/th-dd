@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 2
           ref: main
 
-      - uses: czl9707/gh-space-shooter@v2
+      - uses: czl9707/gh-space-shooter@b24c9792454d1a2e0139ccf72840424e1f83c3f2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-path: 'public/game.webp'
