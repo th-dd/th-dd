@@ -1,6 +1,6 @@
 {
 	"main": "dist/_worker.js/index.js",
-	"name": "ink",
+	"name": "th-dd",
   "compatibility_date": "2026-01-04",
   "compatibility_flags": [
     "nodejs_compat",
