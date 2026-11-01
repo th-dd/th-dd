@@ -3,17 +3,17 @@
   "type": "module",
   "version": "1.0.0",
   "scripts": {
-  "dev": "astro dev --port 4520",
-  "build": "astro build",
-  "preview": "astro preview --port 4521",
-  "astro": "astro"
+    "dev": "astro dev --port 4520",
+    "build": "astro build",
+    "preview": "astro preview --port 4521",
+    "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.4.2",
+    "@astrojs/cloudflare": "^14.4.3",
     "@sipc.ink/tastro": "^0.1.6",
     "@studiocms/ui": "^1.2.2",
-    "astro": "^7.4.2",
-    "marked": "^18.1.1",
+    "astro": "^7.4.4",
+    "marked": "^18.1.2",
     "sharp": "^0.35.5",
     "vite": "^8.3.5"
   }
