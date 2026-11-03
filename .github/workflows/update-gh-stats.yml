@@ -30,9 +30,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
 
-      - name: Prepare 3D SVG (only move)
+      - name: Prepare 3D SVG
         run: |
-          mv profile-3d-contrib/profile-night-rainbow.svg public/
+          if [ -f profile-3d-contrib/profile-night-rainbow.svg ]; then
+            mv profile-3d-contrib/profile-night-rainbow.svg public/
+          fi
           rm -rf profile-3d-contrib
 
       - name: Commit & Push remaining assets
@@ -42,3 +44,4 @@ jobs:
           files: |
             public/**
             !public/.gitkeep
+            
