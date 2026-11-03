@@ -30,13 +30,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
 
-      - name: Move 3D contrib SVG to public/
+      - name: Prepare 3D SVG (only move)
         run: |
-          mkdir -p public
-          if [ -d profile-3d-contrib ]; then
-            mv profile-3d-contrib/*.svg public/ 2>/dev/null || true
-            rm -rf profile-3d-contrib
-          fi
+          mv profile-3d-contrib/profile-night-rainbow.svg public/
+          rm -rf profile-3d-contrib
 
       - name: Commit & Push remaining assets
         uses: IAreKyleW00t/verified-bot-commit@v2
