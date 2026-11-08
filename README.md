@@ -1,27 +1,23 @@
 <div align="center">
 
-# [th-dd](https://th-dd.top)
+# [thdd](https://th-dd.top)
 
 > Hello, thdd!
 
-[🏠 Homepage](https://th-dd.top) · [📚 Docs](https://docs.th-dd.top) · [💻 GitHub](https://github.com/th-dd)
+[🏠 Homepage](https://th-dd.top) · [💻 GitHub](https://github.com/th-dd)
 
 </div>
 
-## 👤 About Me
+## About me
 
 - **Nickname**: thdd
-- **QQ**: [3856150351](https://qm.qq.com/q/jvHsCgdhg4)
+- **邮箱**: [th-dd@foxmail.com](mailto://th-dd@foxmail.com)
 
-## 📊 GitHub Stats
+---
 
 <img src="https://github-stats.mintimate.cn/api?username=th-dd&theme=transparent&show_icons=true" alt="GitHub stats" width="480">
 
-## 🧊 3D Contribution Graph
-
 <img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/profile-night-rainbow.svg" alt="3D contribution graph" width="480">
-
-## 🎮 Daily Game
 
 <img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/game.webp" alt="thdd GitHub Game" width="480">
 
