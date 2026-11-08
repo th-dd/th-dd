@@ -4,6 +4,11 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # 资产 workflow 用 GITHUB_TOKEN 提交，那类 push 不会触发其它 workflow；
+  # 所以这里监听它的完成事件，失败也能在本次 run 里直接看到
+  workflow_run:
+    workflows: ["Update GitHub Game & 3D Contrib"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -18,6 +23,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v7
