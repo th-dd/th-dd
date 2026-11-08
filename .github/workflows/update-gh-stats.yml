@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 2
+          fetch-depth: 0   # 需要在被拒时 rebase 到最新 main，浅克隆容易缺 merge-base
           ref: main
 
       - uses: czl9707/gh-space-shooter@b24c9792454d1a2e0139ccf72840424e1f83c3f2
@@ -93,12 +93,26 @@ jobs:
               print('no real gain, kept the original')
           PY
 
-      - name: Commit & Push remaining assets
-        uses: IAreKyleW00t/verified-bot-commit@v2
-        with:
-          message: "chore: update game and 3D contrib"
-          files: |
-            public/**
-            !public/.gitkeep
+      - name: Commit & push assets (rebase onto latest main, retry)
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A public
+          if git diff --cached --quiet; then echo "没有产物变化，跳过提交"; exit 0; fi
+          git commit -m "chore: update game and 3D contrib"
+
+          # 期间有人推了 main 时，本地提交会 non-fast-forward；rebase 到最新再推，最多 3 次
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            if git rebase --quiet origin/main && git push --quiet; then
+              echo "第 $attempt 次尝试推送成功"
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 5))
+          done
+          echo "重试 3 次仍然推送失败" >&2
+          exit 1
 
             
