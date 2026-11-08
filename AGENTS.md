@@ -52,7 +52,7 @@ wrangler.jsonc             Cloudflare Workers 部署配置（未接 adapter，�
 
 左栏 `Profile · Time · About`，右栏 `Readme · Hitokoto · Footer`；容器 `max-width: 1080px`，`grid-template-columns: minmax(0,1fr) minmax(0,2fr)`，≤768px 折成单栏。卡片和网格项都带 `min-width: 0`，别去掉：README 里带 `width` 的图会把轨道撑宽、窄屏横向溢出。
 
-README 卡片里的图：位图 `max-width: min(100%, 560px)`，游戏动图锁 420（源只有 420 宽，放大就糊），`.svg`（3D 贡献图）`width: 100%` 且不限高——矢量放大不糊。
+README 卡片里的图：位图 `max-width: min(100%, 480px)`，游戏动图锁 420（源只有 420 宽，放大就糊），**3D 贡献图在站点上用光栅版 `profile-night-rainbow.webp`（`width: 100%`），不要换回 SVG**：`<img>` 里的 SVG 每帧重绘都要重新光栅化，实测滚动 2 秒主线程 15,124ms，换 WebP 后 92ms。`Readme.astro` 里只在光栅文件存在时才改写 `src`，缺失时自动退回 SVG。**光栅化前必须先把柱子颜色固化**：那张 SVG 的配色全靠 `@keyframes` 动画，librsvg 不跑动画，直接渲染出来是一片黑色柱子——workflow 里按**柱子层级取色环不同相位**（l0 红 → l4 蓝紫）把 `fill` 固化成静态彩虹再转；只取单一帧会变成整张单色。README.md 给 GitHub 看的仍是 SVG。
 新增卡片：建 `src/cards/x.astro` → 根节点带 `glass-card` → 在 `index.astro` 对应 `column-left` / `column-right` 里 import 并使用。
 
 ## 现状缺口（别被误导）
@@ -95,7 +95,8 @@ pnpm preview  # 4521，验产物
 - `astro.yml`：push 到 `main` 或手动触发 → `pnpm install` + `pnpm astro build --site/--base`（取 Pages 输出）→ 上传产物 → 部署 Pages。Node 24 + pnpm 11，与 CI 保持一致，别随手升。
 - `push-gitee.yml`：push / 每日 UTC 16:00 / 手动 → `Yikun/hub-mirror-action` 把 `th-dd`（→`ya2`）和 `thTag/docs` 镜像到 Gitee。
 - `update-gh-stats.yml`：每日 UTC 16:00 → 用 `gh-space-shooter` 生成 `public/game.webp`、用 `github-profile-3d-contrib` 生成 `public/profile-*.svg`，然后自动提交。**这两个文件是机器产物，别手改**。
-- 生成完有一步 **Pillow 压缩**：把 `game.webp` 重编码到 420 宽、q50，帧数/时长/策略不动（860 宽 6.4 MB → 420 宽 2.0 MB）。三条硬约束：① 只能用 Pillow，**别换 sharp**——libwebp 编码器有 16383 px 高度上限，1561 帧的竖条会被它判 `Processed image is too large`；② Pillow 读不到 webp 的逐帧 duration，脚本里默认写死 25 ms（=40fps），**改 `fps` 输入时要同步改这个默认值**；③ 压完若不到原来的 90% 就丢弃压缩结果、保留原图，步骤带 `continue-on-error`，压缩失败不许阻断每日更新。
+- 生成完还有一步 **光栅化 3D 图**：把 `profile-night-rainbow.svg` 用 `rsvg-convert` + Pillow 转成同图 `profile-night-rainbow.webp`（900 宽，约 17 KB）。原因见下：站点卡片里用 SVG 会拖垮滚动。
+- 同一步里还有 **Pillow 压缩**：把 `game.webp` 重编码到 420 宽、q50，帧数/时长/策略不动（860 宽 6.4 MB → 420 宽 2.0 MB）。三条硬约束：① 只能用 Pillow，**别换 sharp**——libwebp 编码器有 16383 px 高度上限，1561 帧的竖条会被它判 `Processed image is too large`；② Pillow 读不到 webp 的逐帧 duration，脚本里默认写死 25 ms（=40fps），**改 `fps` 输入时要同步改这个默认值**；③ 压完若不到原来的 90% 就丢弃压缩结果、保留原图，步骤带 `continue-on-error`，压缩失败不许阻断每日更新。
 - `.github/dependabot.yml`：每周给 npm 和 github-actions 各开一组 PR（已分组降噪）。**没有自动合并 workflow**，PR 需要人合并；合并后若 `pnpm-lock.yaml` 冲突，重新 `pnpm install` 生成再提交。
 
 ## 提交规范
