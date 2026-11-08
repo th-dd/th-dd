@@ -28,12 +28,22 @@ const readmeSources = [
 let readmeHtml = null;
 let loadError = null;
 
+// 3D 贡献图在站点上用构建期光栅化的同图 WebP：<img> 里的 SVG 每次重绘都要重新光栅化，
+// 滚动实测主线程 15s -> 0.09s。选的是静态配色的 night-green 主题，光栅结果与 SVG 一致。
+// GitHub 上给人看的 README 仍用 SVG；没有光栅文件时自动退回 SVG。
+const hasRaster3d = existsSync(join(process.cwd(), "public/profile-night-green.webp"));
+
 // 渲染并加固 marked 产物：图片懒加载 + 异步解码，外链新窗口且断开 opener
 function renderReadme(md) {
-    return marked.parse(md)
+    let html = marked.parse(md)
         // README 里那张 6MB 动图不该阻塞首屏
         .replaceAll("<img ", '<img loading="lazy" decoding="async" ')
         .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
+
+    if (hasRaster3d) {
+        html = html.replace(/src="[^"]*\/profile-night-green\.svg"/g, 'src="/profile-night-green.webp"');
+    }
+    return html;
 }
 
 // 1. 构建期优先读本地文件：内容永远与仓库一致，也不依赖网络
@@ -378,8 +388,9 @@ for (const url of readmeSources) {
     }
     
     /* 矢量图（3D 贡献图）放大不糊，按卡片宽度铺满 */
-    /* 矢量图铺满卡片宽度，放大不糊 */
-    .readme-content :global(img[src$=".svg"]) {
+    /* 3D 图铺满卡片宽度（矢量放大不糊，光栅版按卡片宽度即可） */
+    .readme-content :global(img[src$=".svg"]),
+    .readme-content :global(img[src$="profile-night-green.webp"]) {
         width: 100%;
         max-width: 100%;
         max-height: 420px;

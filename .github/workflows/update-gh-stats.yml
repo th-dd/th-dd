@@ -32,10 +32,23 @@ jobs:
 
       - name: Prepare 3D SVG
         run: |
-          if [ -f profile-3d-contrib/profile-night-rainbow.svg ]; then
-            mv profile-3d-contrib/profile-night-rainbow.svg public/
+          if [ -f profile-3d-contrib/profile-night-green.svg ]; then
+            mv profile-3d-contrib/profile-night-green.svg public/
           fi
           rm -rf profile-3d-contrib
+
+      - name: Rasterize 3D graph for the site (SVG repaints are slow)
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq librsvg2-bin
+          python -m pip install --quiet pillow
+          rsvg-convert -w 900 public/profile-night-green.svg -o /tmp/p3d.png
+          python - <<'PY'
+          from PIL import Image
+          Image.open('/tmp/p3d.png').convert('RGB').save(
+              'public/profile-night-green.webp', 'WEBP', quality=82)
+          PY
 
       - name: Shrink game.webp (keep all frames, lower resolution)
         continue-on-error: true
