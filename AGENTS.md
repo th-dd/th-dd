@@ -93,6 +93,7 @@ pnpm preview  # 4521，验产物
 - `astro.yml`：push 到 `main` 或手动触发 → `pnpm install` + `pnpm astro build --site/--base`（取 Pages 输出）→ 上传产物 → 部署 Pages。Node 24 + pnpm 11，与 CI 保持一致，别随手升。
 - `push-gitee.yml`：push / 每日 UTC 16:00 / 手动 → `Yikun/hub-mirror-action` 把 `th-dd`（→`ya2`）和 `thTag/docs` 镜像到 Gitee。
 - `update-gh-stats.yml`：每日 UTC 16:00 → 用 `gh-space-shooter` 生成 `public/game.webp`、用 `github-profile-3d-contrib` 生成 `public/profile-*.svg`，然后自动提交。**这两个文件是机器产物，别手改**。
+- 生成完有一步 **Pillow 压缩**：把 `game.webp` 重编码到 420 宽、q50，帧数/时长/策略不动（860 宽 6.4 MB → 420 宽 2.0 MB）。三条硬约束：① 只能用 Pillow，**别换 sharp**——libwebp 编码器有 16383 px 高度上限，1561 帧的竖条会被它判 `Processed image is too large`；② Pillow 读不到 webp 的逐帧 duration，脚本里默认写死 25 ms（=40fps），**改 `fps` 输入时要同步改这个默认值**；③ 压完若不到原来的 90% 就丢弃压缩结果、保留原图，步骤带 `continue-on-error`，压缩失败不许阻断每日更新。
 - `.github/dependabot.yml`：每周给 npm 和 github-actions 各开一组 PR（已分组降噪）。**没有自动合并 workflow**，PR 需要人合并；合并后若 `pnpm-lock.yaml` 冲突，重新 `pnpm install` 生成再提交。
 
 ## 提交规范
