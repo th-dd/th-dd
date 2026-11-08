@@ -151,7 +151,8 @@ const { t, lang} = useTastro(Astro.request)
     .container {
         position: relative;
         z-index: 2;
-        max-width: 730px;
+        /* PC 上给足宽度，窄屏交给 100% + 媒体查询 */
+        max-width: 1080px;
         width: 100%;
         /* 作为 body 的 flex 项，允许被压缩到内容最小宽度以下，窄屏才不横向溢出 */
         min-width: 0;
