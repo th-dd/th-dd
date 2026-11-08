@@ -16,9 +16,10 @@ const readmeFile = lang === "zh" ? "README_zh-cn.md" : "README.md";
 // 多个镜像源，按优先级排序（将内容最新的源提到最前面）
 const readmeSources = [
     `https://raw.githubusercontent.com/th-dd/th-dd/main/${readmeFile}`,  // 1. GitHub raw (内容最新)
-    `https://gitee.com/ya2/ya2/raw/main/${readmeFile}`,                  // 2. Gitee 镜像 (内容最新)
-    `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${readmeFile}`,        // 3. jsDelivr CDN (有缓存，作为备用)
-    // `https://raw.staticdn.net/th-dd/th-dd/main/${readmeFile}`         // 4. staticdn (打不开，已注释)
+    `https://ghp.th-dd.top/https://raw.githubusercontent.com/th-dd/th-dd/main/${readmeFile}`, // 2. 自建镜像 (raw 被墙时兜底)
+    `https://gitee.com/ya2/ya2/raw/main/${readmeFile}`,                  // 3. Gitee 镜像
+    `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${readmeFile}`,        // 4. jsDelivr CDN (有缓存，作为备用)
+    // `https://raw.staticdn.net/th-dd/th-dd/main/${readmeFile}`         // 5. staticdn (打不开，已注释)
 ];
 
 let readmeHtml = null;
@@ -31,7 +32,11 @@ for (const url of readmeSources) {
         if (response.ok) {
             const md = await response.text();
             if (md && md.length > 0) {
-                readmeHtml = marked.parse(md);
+                readmeHtml = marked.parse(md)
+                    // 图片一律懒加载 + 异步解码：README 里那张 6MB 动图不再阻塞首屏
+                    .replaceAll("<img ", '<img loading="lazy" decoding="async" ')
+                    // 外链新窗口打开，并断开 opener
+                    .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
                 break;
             }
         }
@@ -146,23 +151,39 @@ for (const url of readmeSources) {
         overflow-y: auto;
         padding-right: 8px;
         padding-top: 4px;
+        /* 内容被截断处渐隐，别硬切半个标题或半张图 */
+        mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+        -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
     }
     
     /* Markdown 渲染样式 */
+    /* 居中块：README 顶部标题、签名与链接行 */
+    .readme-content :global([align="center"]) {
+        text-align: center;
+    }
+    
+    .readme-content :global([align="center"] blockquote) {
+        border-left: none;
+        background: none;
+        padding: 0;
+        margin: 6px 0 10px;
+    }
+    
     .readme-content :global(h1) {
-        font-size: 1.5em;
-        margin: 20px 0 10px;
+        font-size: 1.25em;
+        margin: 2px 0 6px;
         color: var(--text-primary);
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 8px;
         font-weight: 700;
+        letter-spacing: 0.02em;
     }
     
     .readme-content :global(h2) {
-        font-size: 1.3em;
-        margin: 18px 0 8px;
+        font-size: 1.02em;
+        margin: 18px 0 6px;
         color: var(--text-primary);
         font-weight: 600;
+        letter-spacing: 0.04em;
+        opacity: 0.9;
     }
     
     .readme-content :global(h3) {
@@ -188,8 +209,16 @@ for (const url of readmeSources) {
     }
     
     .readme-content :global(p) {
-        margin: 8px 0;
+        margin: 6px 0;
         color: var(--text-secondary);
+    }
+    
+    /* 顶部链接行：紧凑分隔，别换行成瀑布 */
+    .readme-content :global([align="center"] p) {
+        font-size: 13px;
+        line-height: 1.9;
+        margin: 0;
+        color: var(--text-muted);
     }
     
     .readme-content :global(a) {
@@ -295,16 +324,22 @@ for (const url of readmeSources) {
         color: var(--text-secondary);
     }
     
+    /* 图片统一居中、限宽限高，长图不再把卡片撑爆 */
     .readme-content :global(img) {
+        display: block;
         max-width: 100%;
+        max-height: 300px;
+        object-fit: contain;
         border-radius: 8px;
-        margin: 8px 0;
+        border: 1px solid var(--border-color);
+        margin: 8px auto;
+        background: rgba(0, 0, 0, 0.12);
     }
     
     .readme-content :global(hr) {
         border: none;
         border-top: 1px solid var(--border-color);
-        margin: 16px 0;
+        margin: 14px 0 10px;
     }
     
     /* 滚动条样式 */
