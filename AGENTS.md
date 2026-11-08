@@ -50,7 +50,9 @@ wrangler.jsonc             Cloudflare Workers 部署配置（未接 adapter，�
 
 ## 布局
 
-左栏 `Profile · Time · About`，右栏 `Readme · Hitokoto · Footer`；`grid-template-columns: 1fr 2fr`，≤768px 折成单栏。
+左栏 `Profile · Time · About`，右栏 `Readme · Hitokoto · Footer`；容器 `max-width: 1080px`，`grid-template-columns: minmax(0,1fr) minmax(0,2fr)`，≤768px 折成单栏。卡片和网格项都带 `min-width: 0`，别去掉：README 里带 `width` 的图会把轨道撑宽、窄屏横向溢出。
+
+README 卡片里的图：位图 `max-width: min(100%, 560px)`，游戏动图锁 420（源只有 420 宽，放大就糊），`.svg`（3D 贡献图）`width: 100%` 且不限高——矢量放大不糊。
 新增卡片：建 `src/cards/x.astro` → 根节点带 `glass-card` → 在 `index.astro` 对应 `column-left` / `column-right` 里 import 并使用。
 
 ## 现状缺口（别被误导）

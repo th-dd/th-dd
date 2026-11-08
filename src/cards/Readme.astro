@@ -342,13 +342,26 @@ for (const url of readmeSources) {
     /* 图片统一居中、限宽限高，长图不再把卡片撑爆 */
     .readme-content :global(img) {
         display: block;
-        max-width: 100%;
+        /* 位图最多放大到 560，别在大卡片里剩一条空边 */
+        max-width: min(100%, 560px);
         max-height: 300px;
         object-fit: contain;
         border-radius: 8px;
         border: 1px solid var(--border-color);
-        margin: 8px auto;
+        margin: 8px 0;
         background: rgba(0, 0, 0, 0.12);
+    }
+    
+    /* 游戏动图源只有 420 宽，别放大到糊 */
+    .readme-content :global(img[src$="game.webp"]) {
+        max-width: min(100%, 420px);
+    }
+    
+    /* 矢量图（3D 贡献图）放大不糊，按卡片宽度铺满 */
+    .readme-content :global(img[src$=".svg"]) {
+        width: 100%;
+        max-height: none;
+        height: auto;
     }
     
     .readme-content :global(hr) {
