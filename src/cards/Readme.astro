@@ -1,6 +1,8 @@
 ---
 import { useTastro } from "@sipc.ink/tastro"
 import { marked } from "marked";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const { lang } = useTastro(Astro.request)
 
@@ -25,18 +27,31 @@ const readmeSources = [
 let readmeHtml = null;
 let loadError = null;
 
-// 服务端获取 README 内容（无 CORS 限制）
+// 渲染并加固 marked 产物：图片懒加载 + 异步解码，外链新窗口且断开 opener
+function renderReadme(md) {
+    return marked.parse(md)
+        // README 里那张 6MB 动图不该阻塞首屏
+        .replaceAll("<img ", '<img loading="lazy" decoding="async" ')
+        .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
+}
+
+// 1. 构建期优先读本地文件：内容永远与仓库一致，也不依赖网络
+try {
+    const md = await readFile(join(process.cwd(), readmeFile), "utf8");
+    if (md.trim()) readmeHtml = renderReadme(md);
+} catch {
+    loadError = "本地 README 读取失败，已改走镜像";
+}
+
+// 2. 本地没有（或为空）再按顺序走镜像
 for (const url of readmeSources) {
+    if (readmeHtml) break;
     try {
         const response = await fetch(url);
         if (response.ok) {
             const md = await response.text();
             if (md && md.length > 0) {
-                readmeHtml = marked.parse(md)
-                    // 图片一律懒加载 + 异步解码：README 里那张 6MB 动图不再阻塞首屏
-                    .replaceAll("<img ", '<img loading="lazy" decoding="async" ')
-                    // 外链新窗口打开，并断开 opener
-                    .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
+                readmeHtml = renderReadme(md);
                 break;
             }
         }
