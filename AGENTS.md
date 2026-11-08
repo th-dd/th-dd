@@ -58,7 +58,7 @@ wrangler.jsonc             Cloudflare Workers 部署配置（未接 adapter，�
 - `links.astro` 是死代码：`index.astro` 第 3 行 import 与第 55 行 `<Links />` 都被注释掉了，页面上没有社交链接卡片。要恢复就取消那两处注释（`.link-btn` 的全局 CSS 还在 `index.astro` 里，能直接用）。
 - `wrangler.jsonc` 指向 `dist/_worker.js/index.js`，但 `astro.config.mjs` 没装 `@astrojs/cloudflare`，纯静态构建**不产生** `_worker.js`。想走 Workers 得先加压入 adapter。
 - 没有 `README_en.md`：英文 README 就是 `README.md`，中文是 `README_zh-cn.md`。
-- 第 4 个镜像 `raw.staticdn.net` 已注释（打不开），前三个按「raw.githubusercontent → gitee → jsdelivr」顺序回退。
+- 本地 `README*.md` 优先于所有镜像；镜像顺序 raw → `ghp.th-dd.top` 自建镜像 → gitee → jsDelivr，第 5 个 `raw.staticdn.net` 已注释（打不开）。
 - 无 lint、无 test、无 formatter，也没有装 `@astrojs/check`。唯一的闸门是 `pnpm build`。
 - 构建必刷 `Astro.request.headers` 警告，是既有状态，不是本次改动引入的（见「常用命令」）。
 
@@ -73,7 +73,7 @@ pnpm preview  # 4521，验产物
 
 提交前跑 `pnpm build`，别只靠 dev 的热更新看效果。构建成功只代表不报错，样式问题还得开页面看。
 
-注意：`Readme.astro` 在构建期用 `fetch` 抓 GitHub raw。**断网照样能构建**，但 README 卡片会渲染成「加载失败」——别把断网结果当成改坏了。
+注意：`Readme.astro` 构建期**先读本地 `README*.md`**（内容永远与仓库一致，且不依赖网络），读不到才按镜像顺序 `fetch`。断网且本地缺文件时卡片才会渲染「加载失败」——别把这种情况当成改坏了。
 
 构建会刷一串 `Astro.request.headers ... is not available on prerendered pages` 的 WARN：tastro 的 `useTastro(Astro.request)` 在静态页上拿不到请求头，语言回退到默认值，功能不受影响。**别为了消警告把 `output` 改成 `server`**。
 
@@ -81,7 +81,7 @@ pnpm preview  # 4521，验产物
 
 - **主题**：深色默认，`html.light` 切浅色，选择存 `localStorage.theme`（只认 `"light"`）。变量定义在 `index.astro` 的 `:root` 和 `:root.light`，两者的键必须一一对应。
 - **字体**：`AaCute`，页面加载子集化后的 `public/AaCute.woff2`（约 1.7 MB，限 GB2312 常用字 + ASCII + 标点），`public/AaCute.ttf`（11.6 MB，全字集）只作老浏览器兜底与子集化源文件，别删。`@font-face` 在 `index.astro` 的 `is:global` 样式里，`<head>` 里有 woff2 的 preload。改了文案出现生僻字要重新子集化：`pyftsubset public/AaCute.ttf --text-file=<字符集文件> --flavor=woff2 --output-file=public/AaCute.woff2 --no-hinting --desubroutinize`。页脚 `footer.font` 链接指向 MiSans 官网（小米澎湃字体）。
-- **背景**：`https://api.yppp.net/api`，`.background-image` 铺满 + `--bg-blur` 虚化（配 `scale(1.1)` 盖住模糊露边）+ `.background-overlay` 遮罩。卡片玻璃单独走 `--card-blur`（比背景低，省合成）。接口挂了就只剩深色底，不是代码 bug。
+- **背景**：`https://api.yppp.net/api`，`.background-image` 铺满 + `--bg-blur` 虚化（配 `scale(1.02)` 盖住模糊露边）+ `.background-overlay` 遮罩。卡片玻璃单独走 `--card-blur`（比背景低，省合成）。接口挂了就只剩深色底，不是代码 bug。
 - **一言**：`https://v1.hitokoto.cn`，按钮为复制 / 换一条。
 - **语言**：`initTastro({ defaultLang: "zh", languages: { en, zh } })` 在 `index.astro`，`<title>` 按 `lang` 切换（zh 叹号大帝 / en thdd）。tastro 用 cookie `lang`，控制台 `window.setLang("en")` 可强切。
 - **折叠状态**：README 折叠存 `localStorage.readme-collapsed`，点整条 header 也会触发切换。
