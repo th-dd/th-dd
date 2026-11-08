@@ -38,11 +38,13 @@ jobs:
           rm -rf profile-3d-contrib
 
       - name: Rasterize 3D graph for the site (SVG repaints are slow)
-        continue-on-error: true
         run: |
+          set -e
+          # 先删掉旧光栅图：这步一旦失败就没有 webp，Readme 会退回刚生成的新 SVG，不会展示旧图
+          rm -f public/profile-night-green.webp
           sudo apt-get update -qq
           sudo apt-get install -y -qq librsvg2-bin
-          python -m pip install --quiet pillow
+          python -m pip install --quiet --no-cache-dir pillow==13.0.0
           rsvg-convert -w 900 public/profile-night-green.svg -o /tmp/p3d.png
           python - <<'PY'
           from PIL import Image
@@ -53,12 +55,12 @@ jobs:
       - name: Shrink game.webp (keep all frames, lower resolution)
         continue-on-error: true
         run: |
-          python -m pip install --quiet pillow
+          python -m pip install --quiet --no-cache-dir pillow==13.0.0
           python - <<'PY'
           import os, sys
           from PIL import Image
 
-          SRC, TMP, WIDTH, QUALITY = 'public/game.webp', 'public/game.shrunk.webp', 420, 50
+          SRC, TMP, WIDTH, QUALITY = 'public/game.webp', '/tmp/game.shrunk.webp', 420, 50
           if not os.path.exists(SRC):
               sys.exit(0)
 

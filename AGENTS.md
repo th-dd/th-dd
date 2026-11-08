@@ -17,7 +17,7 @@
 | 分支 | 只有 `main`，直接往 `main` 提交 |
 | 许可 | MIT，© 2026 叹号大帝 |
 
-技术栈固定，别换：Astro 7.4.4（`output: "static"`）、Vite 8.3.5、`@studiocms/ui` 1.2.2（卡片用它的组件与样式）、`@sipc.ink/tastro` 0.1.6（i18n）、`marked` 18.1.2、`sharp` 0.35.5。
+技术栈固定，别换：Astro 7.4.7（`output: "static"`）、Vite 8.3.6、`@studiocms/ui` 1.2.2（卡片用它的组件与样式）、`@sipc.ink/tastro` 0.1.6（i18n）、`marked` 18.1.3、`sharp` 0.35.5。大版本 / 框架不换；补丁版本跟着 dependabot 走，改完顺手把这里的版本号同步。
 
 ## 硬约束
 
@@ -50,7 +50,7 @@ wrangler.jsonc             Cloudflare Workers 部署配置（未接 adapter，�
 
 ## 布局
 
-左栏 `Profile · Time · About`，右栏 `Readme · Hitokoto · Footer`；容器 `max-width: 1080px`，`grid-template-columns: minmax(0,1fr) minmax(0,2fr)`，≤768px 折成单栏。卡片和网格项都带 `min-width: 0`，别去掉：README 里带 `width` 的图会把轨道撑宽、窄屏横向溢出。
+左栏 `Profile · Time · About`，右栏 `Readme · Hitokoto · Footer`；容器 `max-width: 768px`，`grid-template-columns: minmax(0,1fr) minmax(0,2fr)`，≤768px 折成单栏。卡片和网格项都带 `min-width: 0`，别去掉：README 里带 `width` 的图会把轨道撑宽、窄屏横向溢出。
 
 README 卡片里的图：位图 `max-width: min(100%, 480px)`，游戏动图锁 420（源只有 420 宽，放大就糊），**3D 图在站点上用光栅版 `profile-night-green.webp`**（`width: 100%`、限高 420px），别换回 SVG：`<img>` 里的 SVG 每次重绘都要重新光栅化，实测滚动两秒主线程 **15,124ms**，光栅版 **~90ms**。README 给 GitHub 看的仍是 SVG。
 
@@ -97,7 +97,7 @@ pnpm preview  # 4521，验产物
 - `astro.yml`：push 到 `main` 或手动触发 → `pnpm install` + `pnpm astro build --site/--base`（取 Pages 输出）→ 上传产物 → 部署 Pages。Node 24 + pnpm 11，与 CI 保持一致，别随手升。
 - `push-gitee.yml`：push / 每日 UTC 16:00 / 手动 → `Yikun/hub-mirror-action` 把 `th-dd`（→`ya2`）和 `thTag/docs` 镜像到 Gitee。
 - `update-gh-stats.yml`：每日 UTC 16:00 → 用 `gh-space-shooter` 生成 `public/game.webp`、用 `github-profile-3d-contrib` 生成 `public/profile-*.svg`，然后自动提交。**这两个文件是机器产物，别手改**。
-- 生成完还有一步 **光栅化 3D 图**：`rsvg-convert` + Pillow 把 `public/profile-night-green.svg` 转成同图 `profile-night-green.webp`（900 宽），站点卡片用光栅版，原因见「实现约定要点」。
+- 生成完还有一步 **光栅化 3D 图**：`rsvg-convert` + Pillow 把 `public/profile-night-green.svg` 转成同图 `profile-night-green.webp`（900 宽），站点卡片用光栅版，原因见「实现约定要点」。这步**没有** `continue-on-error`：失败就让整个 job 失败、不提交，避免「新 SVG 配旧光栅图」；步骤开头先删旧 webp，失败时站点退回 SVG。Pillow 固定版本。
 - 同一步里还有 **Pillow 压缩**：把 `game.webp` 重编码到 420 宽、q50，帧数/时长/策略不动（860 宽 6.4 MB → 420 宽 2.0 MB）。三条硬约束：① 只能用 Pillow，**别换 sharp**——libwebp 编码器有 16383 px 高度上限，1561 帧的竖条会被它判 `Processed image is too large`；② Pillow 读不到 webp 的逐帧 duration，脚本里默认写死 25 ms（=40fps），**改 `fps` 输入时要同步改这个默认值**；③ 压完若不到原来的 90% 就丢弃压缩结果、保留原图，步骤带 `continue-on-error`，压缩失败不许阻断每日更新。
 - `.github/dependabot.yml`：每周给 npm 和 github-actions 各开一组 PR（已分组降噪）。**没有自动合并 workflow**，PR 需要人合并；合并后若 `pnpm-lock.yaml` 冲突，重新 `pnpm install` 生成再提交。
 
