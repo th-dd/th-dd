@@ -1,6 +1,10 @@
 ---
 import { useTastro } from "@sipc.ink/tastro"
 import { marked } from "marked";
+import DOMPurify from "isomorphic-dompurify";
+import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 const { lang } = useTastro(Astro.request)
 
@@ -16,22 +20,63 @@ const readmeFile = lang === "zh" ? "README_zh-cn.md" : "README.md";
 // 多个镜像源，按优先级排序（将内容最新的源提到最前面）
 const readmeSources = [
     `https://raw.githubusercontent.com/th-dd/th-dd/main/${readmeFile}`,  // 1. GitHub raw (内容最新)
-    `https://gitee.com/ya2/ya2/raw/main/${readmeFile}`,                  // 2. Gitee 镜像 (内容最新)
-    `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${readmeFile}`,        // 3. jsDelivr CDN (有缓存，作为备用)
-    // `https://raw.staticdn.net/th-dd/th-dd/main/${readmeFile}`         // 4. staticdn (打不开，已注释)
+    `https://ghp.th-dd.top/https://raw.githubusercontent.com/th-dd/th-dd/main/${readmeFile}`, // 2. 自建镜像 (raw 被墙时兜底)
+    `https://gitee.com/ya2/ya2/raw/main/${readmeFile}`,                  // 3. Gitee 镜像
+    `https://cdn.jsdelivr.net/gh/th-dd/th-dd@main/${readmeFile}`,        // 4. jsDelivr CDN (有缓存，作为备用)
+    // `https://raw.staticdn.net/th-dd/th-dd/main/${readmeFile}`         // 5. staticdn (打不开，已注释)
 ];
 
 let readmeHtml = null;
 let loadError = null;
 
-// 服务端获取 README 内容（无 CORS 限制）
+// 3D 贡献图在站点上用构建期光栅化的同图 WebP：<img> 里的 SVG 每次重绘都要重新光栅化，
+// 滚动实测主线程 15s -> 0.09s。选的是静态配色的 night-green 主题，光栅结果与 SVG 一致。
+// GitHub 上给人看的 README 仍用 SVG；没有光栅文件时自动退回 SVG。
+const hasRaster3d = existsSync(join(process.cwd(), "public/profile-night-green.webp"));
+
+// README 是外部内容（缺失时还会从 gitee / jsDelivr 等第三方镜像取），
+// set:html 前必须过一遍白名单消毒，否则镜像被动手就能在本站 origin 执行脚本
+const README_TAGS = [
+    "div", "p", "br", "span", "sub", "sup", "h1", "h2", "h3", "h4", "h5", "h6",
+    "blockquote", "ul", "ol", "li", "a", "img", "strong", "em", "del", "code", "pre", "hr",
+    "table", "thead", "tbody", "tr", "th", "td", "details", "summary",
+];
+const README_ATTR = ["href", "src", "alt", "title", "width", "height", "align", "colspan", "rowspan"];
+
+// 渲染并加固 marked 产物：先消毒，再补图片懒加载 + 异步解码、外链新窗口且断开 opener
+function renderReadme(md) {
+    let html = DOMPurify.sanitize(marked.parse(md), {
+        ALLOWED_TAGS: README_TAGS,
+        ALLOWED_ATTR: README_ATTR,
+        ALLOW_DATA_ATTR: false,
+    })
+        // README 里那张 6MB 动图不该阻塞首屏
+        .replaceAll("<img ", '<img loading="lazy" decoding="async" ')
+        .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
+
+    if (hasRaster3d) {
+        html = html.replace(/src="[^"]*\/profile-night-green\.svg"/g, 'src="/profile-night-green.webp"');
+    }
+    return html;
+}
+
+// 1. 构建期优先读本地文件：内容永远与仓库一致，也不依赖网络
+try {
+    const md = await readFile(join(process.cwd(), readmeFile), "utf8");
+    if (md.trim()) readmeHtml = renderReadme(md);
+} catch {
+    loadError = "本地 README 读取失败，已改走镜像";
+}
+
+// 2. 本地没有（或为空）再按顺序走镜像
 for (const url of readmeSources) {
+    if (readmeHtml) break;
     try {
         const response = await fetch(url);
         if (response.ok) {
             const md = await response.text();
             if (md && md.length > 0) {
-                readmeHtml = marked.parse(md);
+                readmeHtml = renderReadme(md);
                 break;
             }
         }
@@ -70,6 +115,27 @@ for (const url of readmeSources) {
     .readme-card {
         width: 100%;
         padding: 20px;
+        /* 内容要滚动，去掉 backdrop-filter：否则每帧都要重算整卡模糊 */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: var(--bg-card-strong) !important;
+    }
+    
+    /* 折叠容器兼作渐隐遮罩的定位基准 */
+    .readme-content-wrapper {
+        position: relative;
+    }
+    
+    /* 用一层静态渐变替代 mask-image（mask 会让整块内容多一层合成） */
+    .readme-content-wrapper::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 8px;
+        bottom: 0;
+        height: 26px;
+        pointer-events: none;
+        background: linear-gradient(to bottom, transparent, var(--bg-card-strong));
     }
     
     .readme-header {
@@ -146,23 +212,37 @@ for (const url of readmeSources) {
         overflow-y: auto;
         padding-right: 8px;
         padding-top: 4px;
+
     }
     
     /* Markdown 渲染样式 */
+    /* 居中块：README 顶部标题、签名与链接行 */
+    .readme-content :global([align="center"]) {
+        text-align: center;
+    }
+    
+    .readme-content :global([align="center"] blockquote) {
+        border-left: none;
+        background: none;
+        padding: 0;
+        margin: 6px 0 10px;
+    }
+    
     .readme-content :global(h1) {
-        font-size: 1.5em;
-        margin: 20px 0 10px;
+        font-size: 1.25em;
+        margin: 2px 0 6px;
         color: var(--text-primary);
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 8px;
         font-weight: 700;
+        letter-spacing: 0.02em;
     }
     
     .readme-content :global(h2) {
-        font-size: 1.3em;
-        margin: 18px 0 8px;
+        font-size: 1.02em;
+        margin: 18px 0 6px;
         color: var(--text-primary);
         font-weight: 600;
+        letter-spacing: 0.04em;
+        opacity: 0.9;
     }
     
     .readme-content :global(h3) {
@@ -188,8 +268,16 @@ for (const url of readmeSources) {
     }
     
     .readme-content :global(p) {
-        margin: 8px 0;
+        margin: 6px 0;
         color: var(--text-secondary);
+    }
+    
+    /* 顶部链接行：紧凑分隔，别换行成瀑布 */
+    .readme-content :global([align="center"] p) {
+        font-size: 13px;
+        line-height: 1.9;
+        margin: 0;
+        color: var(--text-muted);
     }
     
     .readme-content :global(a) {
@@ -295,16 +383,38 @@ for (const url of readmeSources) {
         color: var(--text-secondary);
     }
     
+    /* 图片统一居中、限宽限高，长图不再把卡片撑爆 */
     .readme-content :global(img) {
-        max-width: 100%;
+        display: block;
+        /* 位图最多 480：比这更大的光栅在滚动时更吃重绘 */
+        max-width: min(100%, 480px);
+        max-height: 300px;
+        object-fit: contain;
         border-radius: 8px;
+        border: 1px solid var(--border-color);
         margin: 8px 0;
+        background: rgba(0, 0, 0, 0.12);
+    }
+    
+    /* 游戏动图源只有 420 宽，别放大到糊 */
+    .readme-content :global(img[src$="game.webp"]) {
+        max-width: min(100%, 420px);
+    }
+    
+    /* 矢量图（3D 贡献图）放大不糊，按卡片宽度铺满 */
+    /* 3D 图铺满卡片宽度（矢量放大不糊，光栅版按卡片宽度即可） */
+    .readme-content :global(img[src$=".svg"]),
+    .readme-content :global(img[src$="profile-night-green.webp"]) {
+        width: 100%;
+        max-width: 100%;
+        max-height: 420px;
+        height: auto;
     }
     
     .readme-content :global(hr) {
         border: none;
         border-top: 1px solid var(--border-color);
-        margin: 16px 0;
+        margin: 14px 0 10px;
     }
     
     /* 滚动条样式 */
