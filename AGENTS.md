@@ -1,7 +1,7 @@
 # AGENTS.md — th-dd 个人主页
 
 > 给 AI 编码代理的项目说明。旧的 `PROJECT_GUIDE.md` 已整体过期，已删除；本文件是唯一事实来源。
-> 事实核定：2026-11-01，`main` @ `4890ee3`。动手前先读本文，再读你要修改的文件本体。
+> 事实核定：2026-11-08（改动与本文件在同一次提交里彼此对齐）。动手前先读本文，再读你要修改的文件本体。
 
 ## 这是什么
 
@@ -23,7 +23,7 @@
 
 1. **只做最小改动**，跟现有写法对齐：源码注释是中文，新注释也用中文。
 2. **不动技术选型**：不换框架、不引 CSS 框架 / 状态库 / 别的 UI 组件库、不上 SSR（`output` 保持 `static`）。
-3. **卡片样式走变量**：高度、玻璃、圆角、边框全部用 `--bg-card` / `--border-color` 这些 CSS 变量。`index.astro` 里那段 `!important` 是压 studioCMS 主题用的，**别去掉**，去掉主题切换就失效。
+3. **卡片样式走变量**：高度、玻璃、圆角、边框全部用 `--bg-card` / `--border-color` 这些 CSS 变量；虚化强度同理走 `--bg-blur` / `--card-blur`，别写死 px。`index.astro` 里那段 `!important` 是压 studioCMS 主题用的，**别去掉**，去掉主题切换就失效。
 4. **i18n 双语成对**：`src/i18n/zh.json` 与 `en.json` 键名必须完全一致，加一个键就两边一起加（缺键时另一语言渲染空）。键名被 `t()` 直接引用，别重命名。
 5. **别动部署事实**：域名、`site`、Pages 设置、`GITEE_*` / `GH_PAT` 三个 secret 名、镜像映射关系。
 6. **别把 token / 密钥写进代码**，只在 workflow 里用 `secrets.*`。
@@ -80,8 +80,8 @@ pnpm preview  # 4521，验产物
 ## 实现约定要点
 
 - **主题**：深色默认，`html.light` 切浅色，选择存 `localStorage.theme`（只认 `"light"`）。变量定义在 `index.astro` 的 `:root` 和 `:root.light`，两者的键必须一一对应。
-- **字体**：`AaCute`（`public/AaCute.ttf`），`@font-face` 在 `index.astro` 的 `is:global` 样式里。页脚 `footer.font` 链接指向 MiSans 官网（小米澎湃字体）。
-- **背景**：`https://api.yppp.net/api`，`.background-image` 铺满 + `.background-overlay` 遮罩。接口挂了就只剩深色底，不是代码 bug。
+- **字体**：`AaCute`，页面加载子集化后的 `public/AaCute.woff2`（约 1.7 MB，限 GB2312 常用字 + ASCII + 标点），`public/AaCute.ttf`（11.6 MB，全字集）只作老浏览器兜底与子集化源文件，别删。`@font-face` 在 `index.astro` 的 `is:global` 样式里，`<head>` 里有 woff2 的 preload。改了文案出现生僻字要重新子集化：`pyftsubset public/AaCute.ttf --text-file=<字符集文件> --flavor=woff2 --output-file=public/AaCute.woff2 --no-hinting --desubroutinize`。页脚 `footer.font` 链接指向 MiSans 官网（小米澎湃字体）。
+- **背景**：`https://api.yppp.net/api`，`.background-image` 铺满 + `--bg-blur` 虚化（配 `scale(1.1)` 盖住模糊露边）+ `.background-overlay` 遮罩。卡片玻璃单独走 `--card-blur`（比背景低，省合成）。接口挂了就只剩深色底，不是代码 bug。
 - **一言**：`https://v1.hitokoto.cn`，按钮为复制 / 换一条。
 - **语言**：`initTastro({ defaultLang: "zh", languages: { en, zh } })` 在 `index.astro`，`<title>` 按 `lang` 切换（zh 叹号大帝 / en thdd）。tastro 用 cookie `lang`，控制台 `window.setLang("en")` 可强切。
 - **折叠状态**：README 折叠存 `localStorage.readme-collapsed`，点整条 header 也会触发切换。
