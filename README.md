@@ -17,7 +17,7 @@
 
 <img src="https://github-stats.mintimate.cn/api?username=th-dd&theme=transparent&show_icons=true" alt="GitHub stats" width="480">
 
-<img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/profile-night-rainbow.svg" alt="3D contribution graph" width="480">
+<img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/profile-night-green.svg" alt="3D contribution graph" width="480">
 
 <img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/game.webp" alt="thdd GitHub Game" width="480">
 
