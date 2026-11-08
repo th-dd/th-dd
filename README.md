@@ -11,7 +11,7 @@
 ## About me
 
 - **Nickname**: thdd
-- **邮箱**: [th-dd@foxmail.com](mailto://th-dd@foxmail.com)
+- **邮箱**: [th-dd@foxmail.com](mailto:th-dd@foxmail.com)
 
 ---
 
@@ -19,7 +19,7 @@
 
 <img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/profile-night-green.svg" alt="3D contribution graph" width="480">
 
-<img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/game.webp" alt="thdd GitHub Game" width="480">
+<img src="https://github.com/th-dd/th-dd/raw/refs/heads/main/public/game.webp" alt="thdd GitHub Game" width="420">
 
 ---
 
