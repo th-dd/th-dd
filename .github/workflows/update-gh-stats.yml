@@ -37,6 +37,42 @@ jobs:
           fi
           rm -rf profile-3d-contrib
 
+      - name: Rasterize 3D graph for the site (SVG repaints are slow)
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq librsvg2-bin
+          python -m pip install --quiet pillow
+          # librsvg 不跑 CSS 动画，柱子颜色全来自 @keyframes：改成静态彩虹——
+          # 按柱子层级取色环的不同相位（l0 红 -> l4 蓝紫），保留主题自己的配色
+          python - <<'PY'
+          import re
+          src = open('public/profile-night-rainbow.svg', encoding='utf-8').read()
+          a = src.index('<style>') + len('<style>')
+          b = src.index('</style>')
+          body = src[a:b]
+          phases = ['0.00%', '16.67%', '33.33%', '50.00%', '66.67%']
+          colors = {}
+          for chunk in re.split(r'@keyframes\s+', body)[1:]:
+              name = re.match(r'([\w-]+)', chunk)
+              lv = re.match(r'rb-l(\d)-(top|left)$', name.group(1)) if name else None
+              if not lv:
+                  continue
+              hit = re.search(re.escape(phases[min(int(lv.group(1)), 4)]) + r'\{fill:(rgb\([^)]*\))', chunk)
+              if hit:
+                  colors[name.group(1)] = hit.group(1)
+          body = re.sub(r'animation:[^;}]*;?', '', body)
+          body += ''.join(f'.{k}{{fill:{v}}}' for k, v in colors.items())
+          open('/tmp/p3d-static.svg', 'w', encoding='utf-8').write(src[:a] + body + src[b:])
+          print('flattened classes:', len(colors))
+          PY
+          rsvg-convert -w 900 /tmp/p3d-static.svg -o /tmp/p3d.png
+          python - <<'PY'
+          from PIL import Image
+          Image.open('/tmp/p3d.png').convert('RGB').save(
+              'public/profile-night-rainbow.webp', 'WEBP', quality=82)
+          PY
+
       - name: Shrink game.webp (keep all frames, lower resolution)
         continue-on-error: true
         run: |

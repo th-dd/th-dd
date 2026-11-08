@@ -2,6 +2,7 @@
 import { useTastro } from "@sipc.ink/tastro"
 import { marked } from "marked";
 import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 const { lang } = useTastro(Astro.request)
@@ -28,11 +29,20 @@ let readmeHtml = null;
 let loadError = null;
 
 // 渲染并加固 marked 产物：图片懒加载 + 异步解码，外链新窗口且断开 opener
+// 3D 贡献图改成构建期光栅化的同图 WebP：SVG 在滚动容器里每次重绘都要重新光栅化，
+// 实测主线程 15s → 0.09s；GitHub 那边的 README 仍用 SVG。没有光栅文件时退回 SVG。
+const hasRaster3d = existsSync(join(process.cwd(), "public/profile-night-rainbow.webp"));
+
 function renderReadme(md) {
-    return marked.parse(md)
+    let html = marked.parse(md)
         // README 里那张 6MB 动图不该阻塞首屏
         .replaceAll("<img ", '<img loading="lazy" decoding="async" ')
         .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
+
+    if (hasRaster3d) {
+        html = html.replace(/src="[^"]*\/profile-night-rainbow\.svg"/g, 'src="/profile-night-rainbow.webp"');
+    }
+    return html;
 }
 
 // 1. 构建期优先读本地文件：内容永远与仓库一致，也不依赖网络
@@ -90,6 +100,27 @@ for (const url of readmeSources) {
     .readme-card {
         width: 100%;
         padding: 20px;
+        /* 内容要滚动，去掉 backdrop-filter：否则每帧都要重算整卡模糊 */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: var(--bg-card-strong) !important;
+    }
+    
+    /* 折叠容器兼作渐隐遮罩的定位基准 */
+    .readme-content-wrapper {
+        position: relative;
+    }
+    
+    /* 用一层静态渐变替代 mask-image（mask 会让整块内容多一层合成） */
+    .readme-content-wrapper::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 8px;
+        bottom: 0;
+        height: 26px;
+        pointer-events: none;
+        background: linear-gradient(to bottom, transparent, var(--bg-card-strong));
     }
     
     .readme-header {
@@ -166,9 +197,7 @@ for (const url of readmeSources) {
         overflow-y: auto;
         padding-right: 8px;
         padding-top: 4px;
-        /* 内容被截断处渐隐，别硬切半个标题或半张图 */
-        mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
-        -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+
     }
     
     /* Markdown 渲染样式 */
@@ -342,8 +371,8 @@ for (const url of readmeSources) {
     /* 图片统一居中、限宽限高，长图不再把卡片撑爆 */
     .readme-content :global(img) {
         display: block;
-        /* 位图最多放大到 560，别在大卡片里剩一条空边 */
-        max-width: min(100%, 560px);
+        /* 位图最多 480：比这更大的光栅在滚动时更吃重绘 */
+        max-width: min(100%, 480px);
         max-height: 300px;
         object-fit: contain;
         border-radius: 8px;
@@ -358,9 +387,10 @@ for (const url of readmeSources) {
     }
     
     /* 矢量图（3D 贡献图）放大不糊，按卡片宽度铺满 */
-    .readme-content :global(img[src$=".svg"]) {
+    .readme-content :global(img[src$=".svg"]),
+    .readme-content :global(img[src$="profile-night-rainbow.webp"]) {
         width: 100%;
-        max-height: none;
+        max-height: 420px;
         height: auto;
     }
     
