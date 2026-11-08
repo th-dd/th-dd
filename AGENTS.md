@@ -80,7 +80,7 @@ pnpm preview  # 4521，验产物
 ## 实现约定要点
 
 - **主题**：深色默认，`html.light` 切浅色，选择存 `localStorage.theme`（只认 `"light"`）。变量定义在 `index.astro` 的 `:root` 和 `:root.light`，两者的键必须一一对应。
-- **字体**：`AaCute`，页面加载子集化后的 `public/AaCute.woff2`（约 1.7 MB，限 GB2312 常用字 + ASCII + 标点），`public/AaCute.ttf`（11.6 MB，全字集）只作老浏览器兜底与子集化源文件，别删。`@font-face` 在 `index.astro` 的 `is:global` 样式里，`<head>` 里有 woff2 的 preload。改了文案出现生僻字要重新子集化：`pyftsubset public/AaCute.ttf --text-file=<字符集文件> --flavor=woff2 --output-file=public/AaCute.woff2 --no-hinting --desubroutinize`。页脚 `footer.font` 链接指向 MiSans 官网（小米澎湃字体）。
+- **字体**：`AaCute`，页面加载子集化后的 `public/AaCute.woff2`（约 1.7 MB，限 GB2312 常用字 + ASCII + 标点），`public/AaCute.ttf`（11.6 MB，全字集）只作老浏览器兜底与子集化源文件，别删。`@font-face` 在 `index.astro` 的 `is:global` 样式里。**别给 woff2 加 preload**：1.7 MB 的预载会抢在 CSS 前面，实测首屏 FCP 从 ~248ms 涨到 300–700ms，用 `font-display: swap` 让它自己二次进场更划算。改了文案出现生僻字要重新子集化：`pyftsubset public/AaCute.ttf --text-file=<字符集文件> --flavor=woff2 --output-file=public/AaCute.woff2 --no-hinting --desubroutinize`。页脚 `footer.font` 链接指向 MiSans 官网（小米澎湃字体）。
 - **背景**：`https://api.yppp.net/api`，`.background-image` 铺满 + `--bg-blur` 虚化（配 `scale(1.02)` 盖住模糊露边）+ `.background-overlay` 遮罩。卡片玻璃单独走 `--card-blur`（比背景低，省合成）。接口挂了就只剩深色底，不是代码 bug。
 - **一言**：`https://v1.hitokoto.cn`，按钮为复制 / 换一条。
 - **语言**：`initTastro({ defaultLang: "zh", languages: { en, zh } })` 在 `index.astro`，`<title>` 按 `lang` 切换（zh 叹号大帝 / en thdd）。tastro 用 cookie `lang`，控制台 `window.setLang("en")` 可强切。
