@@ -20,6 +20,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # 上游资产更新失败时 build/deploy 会被跳过，没有这个 job 本次 run 会显示成功
+  upstream-guard:
+    name: Fail when the asset update failed
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success'
+    steps:
+      - run: |
+          echo "上游泳资产更新结论：${{ github.event.workflow_run.conclusion }}"
+          exit 1
+
   build:
     name: Build
     runs-on: ubuntu-latest

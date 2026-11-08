@@ -1,6 +1,7 @@
 ---
 import { useTastro } from "@sipc.ink/tastro"
 import { marked } from "marked";
+import DOMPurify from "isomorphic-dompurify";
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -33,9 +34,22 @@ let loadError = null;
 // GitHub 上给人看的 README 仍用 SVG；没有光栅文件时自动退回 SVG。
 const hasRaster3d = existsSync(join(process.cwd(), "public/profile-night-green.webp"));
 
-// 渲染并加固 marked 产物：图片懒加载 + 异步解码，外链新窗口且断开 opener
+// README 是外部内容（缺失时还会从 gitee / jsDelivr 等第三方镜像取），
+// set:html 前必须过一遍白名单消毒，否则镜像被动手就能在本站 origin 执行脚本
+const README_TAGS = [
+    "div", "p", "br", "span", "sub", "sup", "h1", "h2", "h3", "h4", "h5", "h6",
+    "blockquote", "ul", "ol", "li", "a", "img", "strong", "em", "del", "code", "pre", "hr",
+    "table", "thead", "tbody", "tr", "th", "td", "details", "summary",
+];
+const README_ATTR = ["href", "src", "alt", "title", "width", "height", "align", "colspan", "rowspan"];
+
+// 渲染并加固 marked 产物：先消毒，再补图片懒加载 + 异步解码、外链新窗口且断开 opener
 function renderReadme(md) {
-    let html = marked.parse(md)
+    let html = DOMPurify.sanitize(marked.parse(md), {
+        ALLOWED_TAGS: README_TAGS,
+        ALLOWED_ATTR: README_ATTR,
+        ALLOW_DATA_ATTR: false,
+    })
         // README 里那张 6MB 动图不该阻塞首屏
         .replaceAll("<img ", '<img loading="lazy" decoding="async" ')
         .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
