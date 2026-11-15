@@ -1,16 +1,14 @@
 {
-	"main": "dist/_worker.js/index.js",
-	"name": "th-dd",
-  "compatibility_date": "2026-01-04",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./dist"
-	},
-	"observability": {
-    "enabled": true
-  }
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "th-dd",
+  "compatibility_date": "2026-11-15",
+  // 纯静态：没有 main，Worker 只负责直出 dist 里的资源
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  // 自定义域名：只绑 www，apex 由 CF 的 Redirect Rule 301 过来；证书由 Cloudflare 签发
+  "routes": [{ "pattern": "www.th-dd.top", "custom_domain": true }],
+  "observability": { "enabled": true }
 }

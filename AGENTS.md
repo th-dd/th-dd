@@ -10,7 +10,7 @@
 
 | 项 | 值 |
 | --- | --- |
-| 线上 | https://www.th-dd.top （GitHub Pages，自定义域名） |
+| 线上 | https://www.th-dd.top （Cloudflare Workers static assets，自定义域名；apex → www 的 301 由 CF Redirect Rule 做） |
 | Gitee 镜像 | https://gitee.com/ya2/ya2 （`th-dd` → `ya2`） |
 | 本地 dev | http://localhost:4520 |
 | 本地 preview | http://localhost:4521 |
@@ -25,7 +25,7 @@
 2. **不动技术选型**：不换框架、不引 CSS 框架 / 状态库 / 别的 UI 组件库、不上 SSR（`output` 保持 `static`）。
 3. **卡片样式走变量**：高度、玻璃、圆角、边框全部用 `--bg-card` / `--border-color` 这些 CSS 变量；虚化强度同理走 `--bg-blur` / `--card-blur`，别写死 px。`index.astro` 里那段 `!important` 是压 studioCMS 主题用的，**别去掉**，去掉主题切换就失效。
 4. **i18n 双语成对**：`src/i18n/zh.json` 与 `en.json` 键名必须完全一致，加一个键就两边一起加（缺键时另一语言渲染空）。键名被 `t()` 直接引用，别重命名。
-5. **别动部署事实**：域名、`site`、Pages 设置、`GITEE_*` / `GH_PAT` 三个 secret 名、镜像映射关系。
+5. **别动部署事实**：域名（只绑 `www`，apex 靠 CF Redirect Rule 301）、`site`、`wrangler.jsonc` 的 assets/routes、`GITEE_*` / `GH_PAT` / `CLOUDFLARE_*` 这些 secret 名、镜像映射关系。
 6. **别把 token / 密钥写进代码**，只在 workflow 里用 `secrets.*`。
 7. **文案保持口语**，别改写成书面语；「永远相信美好的事情即将发生」这类签名句别动。
 
@@ -45,7 +45,7 @@ src/assets/icon/*.svg      GitHub / Bilibili / QQ 图标
 public/                    静态资源：字体、头像、favicon、game.webp、profile-night-green.svg（3D 贡献图）及其光栅版 .webp
 .github/workflows/         astro.yml 部署 · push-gitee.yml 镜像 · update-gh-stats.yml 每日换图
 astro.config.mjs           site / image(sharp) / studiocmsUi
-wrangler.jsonc             Cloudflare Workers 部署配置（未接 adapter，见「现状缺口」）
+wrangler.jsonc             Cloudflare Workers 部署配置（assets-only，直出 dist）
 ```
 
 ## 布局
@@ -62,7 +62,8 @@ README 卡片里的图：位图 `max-width: min(100%, 480px)`，游戏动图锁 
 ## 现状缺口（别被误导）
 
 - `links.astro` 是死代码：`index.astro` 第 3 行 import 与第 55 行 `<Links />` 都被注释掉了，页面上没有社交链接卡片。要恢复就取消那两处注释（`.link-btn` 的全局 CSS 还在 `index.astro` 里，能直接用）。
-- `wrangler.jsonc` 指向 `dist/_worker.js/index.js`，但 `astro.config.mjs` 没装 `@astrojs/cloudflare`，纯静态构建**不产生** `_worker.js`。想走 Workers 得先加压入 adapter。
+- 站点托管在 **Cloudflare Workers static assets**（assets-only，无 `main`），`wrangler.jsonc` 就是真实配置。GitHub Pages 已停用，但完全可回退：把 `www` 的 CNAME 指回 `<user>.github.io`、恢复 ASTRO Pages workflow 即可。
+- `public/_headers` 控制边缘缓存：资源名不带指纹，所以 `/*` 只给 60s、图片 600s，**只有 `/_astro/*` 能 immutable**。别为了省请求给固定名文件上长 TTL，否则日更的图会长期是旧的。
 - 没有 `README_en.md`：英文 README 就是 `README.md`，中文是 `README_zh-cn.md`。
 - 本地 `README*.md` 优先于所有镜像；镜像顺序 raw → `ghp.th-dd.top` 自建镜像 → gitee → jsDelivr，第 5 个 `raw.staticdn.net` 已注释（打不开）。
 - 无 lint、无 test、无 formatter，也没有装 `@astrojs/check`。唯一的闸门是 `pnpm build`。
@@ -96,7 +97,7 @@ pnpm preview  # 4521，验产物
 
 ## 工作流与部署
 
-- `astro.yml`：push 到 `main` 或手动触发 → `pnpm install` + `pnpm astro build --site/--base`（取 Pages 输出）→ 上传产物 → 部署 Pages。Node 26 + pnpm 12，与 CI 保持一致，别随手升（本地 node 26 / pnpm 12 与此对应）。
+- `astro.yml`：push 到 `main` / 手动 / 上游资产 workflow 成功后触发 → `pnpm install` + `pnpm astro build --site https://www.th-dd.top` → `wrangler deploy`。需要 secrets `CLOUDFLARE_API_TOKEN`（最小权：Workers Scripts:Edit + Workers Routes:Edit）与 `CLOUDFLARE_ACCOUNT_ID`。Node 26 + pnpm 12，与 CI 保持一致，别随手升。
 - `push-gitee.yml`：push / 每日 UTC 16:00 / 手动 → `Yikun/hub-mirror-action` 把 `th-dd`（→`ya2`）和 `thTag/docs` 镜像到 Gitee。
 - `update-gh-stats.yml`：**不能并发跑**（设了 `concurrency: update-assets`，手动触发会排队；否则两次运行会互相覆盖 push）。每日 UTC 16:00 → 用 `gh-space-shooter` 生成 `public/game.webp`、用 `github-profile-3d-contrib` 生成 `public/profile-*.svg`，然后自动提交。**这两个文件是机器产物，别手改**。跑之前会先删旧 SVG，生成器没产出就 `test -f` 失败、整单不提交，避免把旧图重新发布。
 - 生成完还有一步 **光栅化 3D 图**：`rsvg-convert` + Pillow 把 `public/profile-night-green.svg` 转成同图 `profile-night-green.webp`（900 宽），站点卡片用光栅版，原因见「实现约定要点」。这步**没有** `continue-on-error`：失败就让整个 job 失败、不提交，避免「新 SVG 配旧光栅图」；步骤开头先删旧 webp，失败时站点退回 SVG。Pillow 固定版本。
@@ -112,5 +113,5 @@ Conventional Commits + 中文描述，例如 `fix: 修正浅色模式边框`、`
 ## 已知待办
 
 1. 社交链接卡片是否恢复（`links.astro`）。
-2. `wrangler.jsonc` 要不要真正接上 `@astrojs/cloudflare`，还是删掉。
+2. `@astrojs/cloudflare` 现在是纯静态托管、用不到 adapter，依赖里还留着 —— 要不要摘掉。
 3. 补 lint / 类型检查（`@astrojs/check`），把闸门从「能构建」提到「能过检」。
