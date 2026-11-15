@@ -1,4 +1,8 @@
-/*
+# 规则会叠加：不要用 /* 兜底，否则具体路径的 Cache-Control 会和它拼在一起
+/ 
+  Cache-Control: public, max-age=60
+
+/index.html
   Cache-Control: public, max-age=60
 
 /_astro/*
@@ -8,10 +12,22 @@
   Cache-Control: public, max-age=86400
 
 /game.webp
-/profile-night-green.svg
-/profile-night-green.webp
-/avatar.jpg
-/avatar-square.jpg
-/favicon.ico
-/favicon-black.ico
   Cache-Control: public, max-age=600
+
+/profile-night-green.svg
+  Cache-Control: public, max-age=600
+
+/profile-night-green.webp
+  Cache-Control: public, max-age=600
+
+/avatar.jpg
+  Cache-Control: public, max-age=86400
+
+/avatar-square.jpg
+  Cache-Control: public, max-age=86400
+
+/favicon.ico
+  Cache-Control: public, max-age=86400
+
+/favicon-black.ico
+  Cache-Control: public, max-age=86400
