@@ -93,7 +93,7 @@ pnpm preview  # 4521，验产物
 - **语言**：`initTastro({ defaultLang: "zh", languages: { en, zh } })` 在 `index.astro`，`<title>` 按 `lang` 切换（zh 叹号大帝 / en thdd）。tastro 用 cookie `lang`，控制台 `window.setLang("en")` 可强切。
 - **折叠状态**：README 折叠存 `localStorage.readme-collapsed`，点整条 header 也会触发切换。
 - **页脚**：萌ICP备 20261666 的链接全站只有这一处，别删。
-- **public/.assetsignore** 排除 `_worker.js`、`_routes.json` 与 `AaCute.ttf`（11.6 MB 的兜底字面，别传边缘）。改了它记得重跑 `wrangler deploy --dry-run` 看文件数。
+- **public/.assetsignore** 只排除 `_worker.js`、`_routes.json`。**别顺手把字体/图片排除掉**：`AaCute.ttf`（11.6 MB）虽然本站几乎用不到，但被用户其它站点外链引用，排除就是 404。加完规则重跑一次 `wrangler deploy --dry-run` 看文件数。
 
 ## 工作流与部署
 

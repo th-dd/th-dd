@@ -11,6 +11,9 @@
 /AaCute.woff2
   Cache-Control: public, max-age=86400
 
+/AaCute.ttf
+  Cache-Control: public, max-age=86400
+
 /game.webp
   Cache-Control: public, max-age=600
 

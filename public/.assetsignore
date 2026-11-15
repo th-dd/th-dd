@@ -1,4 +1,3 @@
 _worker.js
 _routes.json
-# 11.6 MB 的全字集 ttf 只在极老浏览器兜底，别上传到边缘
-AaCute.ttf
+# 注意：AaCute.ttf 不能排除——它被别的站点外链引用，404 会把那边弄坏
