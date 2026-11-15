@@ -6,7 +6,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write   # 不需要 actions: write——Pages 由 astro.yml 的 workflow_run 触发
+
+concurrency:
+  group: update-assets
+  cancel-in-progress: false
 
 jobs:
   update-assets:
@@ -14,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 2
+          fetch-depth: 0   # 需要在被拒时 rebase 到最新 main，浅克隆容易缺 merge-base
           ref: main
 
       - uses: czl9707/gh-space-shooter@b24c9792454d1a2e0139ccf72840424e1f83c3f2
@@ -25,6 +29,9 @@ jobs:
           no-commit: true
           fps: 40
 
+      - name: Drop previous 3D SVG (a failed run must not republish it)
+        run: rm -f public/profile-night-*.svg
+
       - uses: yoshi389111/github-profile-3d-contrib@v0.9.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,16 +39,80 @@ jobs:
 
       - name: Prepare 3D SVG
         run: |
-          if [ -f profile-3d-contrib/profile-night-rainbow.svg ]; then
-            mv profile-3d-contrib/profile-night-rainbow.svg public/
+          set -e
+          if [ -f profile-3d-contrib/profile-night-green.svg ]; then
+            mv profile-3d-contrib/profile-night-green.svg public/
           fi
           rm -rf profile-3d-contrib
+          test -f public/profile-night-green.svg
 
-      - name: Commit & Push remaining assets
-        uses: IAreKyleW00t/verified-bot-commit@v2
-        with:
-          message: "chore: update game and 3D contrib"
-          files: |
-            public/**
-            !public/.gitkeep
+      - name: Rasterize 3D graph for the site (SVG repaints are slow)
+        run: |
+          set -e
+          # 先删掉旧光栅图：这步一旦失败就没有 webp，Readme 会退回刚生成的新 SVG，不会展示旧图
+          rm -f public/profile-night-green.webp
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq librsvg2-bin
+          python -m pip install --quiet --no-cache-dir pillow==13.0.0
+          rsvg-convert -w 900 public/profile-night-green.svg -o /tmp/p3d.png
+          python - <<'PY'
+          from PIL import Image
+          Image.open('/tmp/p3d.png').convert('RGB').save(
+              'public/profile-night-green.webp', 'WEBP', quality=82)
+          PY
+
+      - name: Shrink game.webp (keep all frames, lower resolution)
+        continue-on-error: true
+        run: |
+          python -m pip install --quiet --no-cache-dir pillow==13.0.0
+          python - <<'PY'
+          import os, sys
+          from PIL import Image
+
+          SRC, TMP, WIDTH, QUALITY = 'public/game.webp', '/tmp/game.shrunk.webp', 420, 50
+          if not os.path.exists(SRC):
+              sys.exit(0)
+
+          im = Image.open(SRC)
+          frames, durations = [], []
+          for i in range(im.n_frames):
+              im.seek(i)
+              frames.append(im.convert('RGB').resize(
+                  (WIDTH, max(1, round(im.size[1] * WIDTH / im.size[0]))), Image.LANCZOS))
+              durations.append(im.info.get('duration', 25))
+
+          frames[0].save(TMP, 'WEBP', save_all=True, append_images=frames[1:],
+                         duration=durations, loop=0, quality=QUALITY, method=5)
+
+          before, after = os.path.getsize(SRC), os.path.getsize(TMP)
+          print(f'game.webp: {before} -> {after} bytes')
+          if after < before * 0.9:
+              os.replace(TMP, SRC)
+          else:
+              os.remove(TMP)
+              print('no real gain, kept the original')
+          PY
+
+      - name: Commit & push assets (rebase onto latest main, retry)
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A public
+          if git diff --cached --quiet; then echo "没有产物变化，跳过提交"; exit 0; fi
+          git commit -m "chore: update game and 3D contrib"
+
+          # 期间有人推了 main 时，本地提交会 non-fast-forward；rebase 到最新再推，最多 3 次
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            if git rebase --quiet origin/main && git push --quiet; then
+              echo "第 $attempt 次尝试推送成功"
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 5))
+          done
+          echo "重试 3 次仍然推送失败" >&2
+          exit 1
+
             

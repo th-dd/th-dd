@@ -1,23 +1,37 @@
-name: Deploy Astro site to Pages
+name: Deploy to Cloudflare
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # 资产 workflow 用 GITHUB_TOKEN 提交，那类 push 不会触发其它 workflow；
+  # 所以这里监听它的完成事件，失败也能在本次 run 里直接看到
+  workflow_run:
+    workflows: ["Update GitHub Game & 3D Contrib"]
+    types: [completed]
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
+  group: "deploy"
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build
+  # 上游资产更新失败时 build/deploy 会被跳过，没有这个 job 本次 run 会显示成功
+  upstream-guard:
+    name: Fail when the asset update failed
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success'
+    steps:
+      - run: |
+          echo "上游资产更新结论：${{ github.event.workflow_run.conclusion }}"
+          exit 1
+
+  deploy:
+    name: Build & deploy
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -25,47 +39,22 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 11
+          version: 12
 
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
           cache: "pnpm"
-
-      - name: Cache dependencies
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}-
-
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v6
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build with Astro
-        run: pnpm astro build --site "${{ steps.pages.outputs.origin }}" --base "${{ steps.pages.outputs.base_path }}"
+        run: pnpm astro build --site "https://www.th-dd.top"
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: ./dist
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
-    name: Deploy
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      - name: Deploy to Cloudflare Workers
+        run: pnpm exec wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

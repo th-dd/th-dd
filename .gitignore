@@ -5,6 +5,9 @@ dist/
 
 # dependencies
 node_modules/
+
+# local headless-edge profile (perf measurement only)
+_ep*/
 scripts/
 
 # logs
