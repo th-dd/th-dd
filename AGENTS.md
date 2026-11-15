@@ -93,11 +93,15 @@ pnpm preview  # 4521，验产物
 - **语言**：`initTastro({ defaultLang: "zh", languages: { en, zh } })` 在 `index.astro`，`<title>` 按 `lang` 切换（zh 叹号大帝 / en thdd）。tastro 用 cookie `lang`，控制台 `window.setLang("en")` 可强切。
 - **折叠状态**：README 折叠存 `localStorage.readme-collapsed`，点整条 header 也会触发切换。
 - **页脚**：萌ICP备 20261666 的链接全站只有这一处，别删。
-- **public/.assetsignore** 目前只列了 `_worker.js`、`_routes.json`，是给 Workers 部署排除用的。
+- **public/.assetsignore** 排除 `_worker.js`、`_routes.json` 与 `AaCute.ttf`（11.6 MB 的兜底字面，别传边缘）。改了它记得重跑 `wrangler deploy --dry-run` 看文件数。
 
 ## 工作流与部署
 
 - `astro.yml`：push 到 `main` / 手动 / 上游资产 workflow 成功后触发 → `pnpm install` + `pnpm astro build --site https://www.th-dd.top` → `wrangler deploy`。需要 secrets `CLOUDFLARE_API_TOKEN`（最小权：Workers Scripts:Edit + Workers Routes:Edit）与 `CLOUDFLARE_ACCOUNT_ID`。Node 26 + pnpm 12，与 CI 保持一致，别随手升。
+  - **合到 main 即上线**：没有灰度、没有人工确认步。合并前确认 secrets 两项都在，且 `www` 没有残留 CNAME（wrangler 绑自定义域会撞名）。
+  - 回滚：`pnpm exec wrangler rollback`（退上一个 Worker 版本，秒级）；再不行就把 `www` 的 CNAME 指回 `<user>.github.io`、在仓库 Settings → Pages 重新启用。
+  - 缓存：/​* 只 60s，改完网页不必清；真要立刻生效在 CF 后台 Caching → Purge Everything（或按 URL 清）。
+  - Pages 相关权限已不需要，`astro.yml` 只有 `contents: read`。
 - `push-gitee.yml`：push / 每日 UTC 16:00 / 手动 → `Yikun/hub-mirror-action` 把 `th-dd`（→`ya2`）和 `thTag/docs` 镜像到 Gitee。
 - `update-gh-stats.yml`：**不能并发跑**（设了 `concurrency: update-assets`，手动触发会排队；否则两次运行会互相覆盖 push）。每日 UTC 16:00 → 用 `gh-space-shooter` 生成 `public/game.webp`、用 `github-profile-3d-contrib` 生成 `public/profile-*.svg`，然后自动提交。**这两个文件是机器产物，别手改**。跑之前会先删旧 SVG，生成器没产出就 `test -f` 失败、整单不提交，避免把旧图重新发布。
 - 生成完还有一步 **光栅化 3D 图**：`rsvg-convert` + Pillow 把 `public/profile-night-green.svg` 转成同图 `profile-night-green.webp`（900 宽），站点卡片用光栅版，原因见「实现约定要点」。这步**没有** `continue-on-error`：失败就让整个 job 失败、不提交，避免「新 SVG 配旧光栅图」；步骤开头先删旧 webp，失败时站点退回 SVG。Pillow 固定版本。
@@ -115,3 +119,4 @@ Conventional Commits + 中文描述，例如 `fix: 修正浅色模式边框`、`
 1. 社交链接卡片是否恢复（`links.astro`）。
 2. `@astrojs/cloudflare` 现在是纯静态托管、用不到 adapter，依赖里还留着 —— 要不要摘掉。
 3. 补 lint / 类型检查（`@astrojs/check`），把闸门从「能构建」提到「能过检」。
+4. 切 CF 并验证稳定后，去仓库 Settings → Pages 关掉 Pages；确认无回退需要再删 Pages 相关的 workflow 残留。
