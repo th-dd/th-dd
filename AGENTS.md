@@ -96,7 +96,7 @@ pnpm preview  # 4521，验产物
 
 ## 工作流与部署
 
-- `astro.yml`：push 到 `main` 或手动触发 → `pnpm install` + `pnpm astro build --site/--base`（取 Pages 输出）→ 上传产物 → 部署 Pages。Node 24 + pnpm 11，与 CI 保持一致，别随手升。
+- `astro.yml`：push 到 `main` 或手动触发 → `pnpm install` + `pnpm astro build --site/--base`（取 Pages 输出）→ 上传产物 → 部署 Pages。Node 26 + pnpm 12，与 CI 保持一致，别随手升（本地 node 26 / pnpm 12 与此对应）。
 - `push-gitee.yml`：push / 每日 UTC 16:00 / 手动 → `Yikun/hub-mirror-action` 把 `th-dd`（→`ya2`）和 `thTag/docs` 镜像到 Gitee。
 - `update-gh-stats.yml`：**不能并发跑**（设了 `concurrency: update-assets`，手动触发会排队；否则两次运行会互相覆盖 push）。每日 UTC 16:00 → 用 `gh-space-shooter` 生成 `public/game.webp`、用 `github-profile-3d-contrib` 生成 `public/profile-*.svg`，然后自动提交。**这两个文件是机器产物，别手改**。跑之前会先删旧 SVG，生成器没产出就 `test -f` 失败、整单不提交，避免把旧图重新发布。
 - 生成完还有一步 **光栅化 3D 图**：`rsvg-convert` + Pillow 把 `public/profile-night-green.svg` 转成同图 `profile-night-green.webp`（900 宽），站点卡片用光栅版，原因见「实现约定要点」。这步**没有** `continue-on-error`：失败就让整个 job 失败、不提交，避免「新 SVG 配旧光栅图」；步骤开头先删旧 webp，失败时站点退回 SVG。Pillow 固定版本。
