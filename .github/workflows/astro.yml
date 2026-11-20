@@ -1,14 +1,10 @@
-name: Deploy to Cloudflare
+name: Deploy to Cloudflare (manual fallback)
 
+# 主链路是 Cloudflare Workers Builds：推 main 由 CF 自己构建并部署，
+# 见 AGENTS.md「部署」。这个 workflow 只作逃生口——CF 侧构建挂掉时手动
+# Run workflow，仍能从仓库部署同一份代码，不必等 CF 修好。
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
-  # 资产 workflow 用 GITHUB_TOKEN 提交，那类 push 不会触发其它 workflow；
-  # 所以这里监听它的完成事件，失败也能在本次 run 里直接看到
-  workflow_run:
-    workflows: ["Update GitHub Game & 3D Contrib"]
-    types: [completed]
 
 permissions:
   contents: read
@@ -18,20 +14,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # 上游资产更新失败时 build/deploy 会被跳过，没有这个 job 本次 run 会显示成功
-  upstream-guard:
-    name: Fail when the asset update failed
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success'
-    steps:
-      - run: |
-          echo "上游资产更新结论：${{ github.event.workflow_run.conclusion }}"
-          exit 1
-
   deploy:
     name: Build & deploy
     runs-on: ubuntu-latest
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v7

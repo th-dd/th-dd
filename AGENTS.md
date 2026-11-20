@@ -43,7 +43,7 @@ src/cards/links.astro      社交链接按钮——**目前未启用**（见下�
 src/i18n/{zh,en}.json      全部文案
 src/assets/icon/*.svg      GitHub / Bilibili / QQ 图标
 public/                    静态资源：字体、头像、favicon、game.webp、profile-night-green.svg（3D 贡献图）及其光栅版 .webp
-.github/workflows/         astro.yml 部署 · push-gitee.yml 镜像 · update-gh-stats.yml 每日换图
+.github/workflows/         astro.yml 手动兜底部署（主链路在 CF Builds）· push-gitee.yml 镜像 · update-gh-stats.yml 每日换图
 astro.config.mjs           site / image(sharp) / studiocmsUi
 wrangler.jsonc             Cloudflare Workers 部署配置（assets-only，直出 dist）
 ```
@@ -64,6 +64,7 @@ README 卡片里的图：位图 `max-width: min(100%, 480px)`，游戏动图锁 
 - `links.astro` 是死代码：`index.astro` 第 3 行 import 与第 55 行 `<Links />` 都被注释掉了，页面上没有社交链接卡片。要恢复就取消那两处注释（`.link-btn` 的全局 CSS 还在 `index.astro` 里，能直接用）。
 - 站点托管在 **Cloudflare Workers static assets**（assets-only，无 `main`），`wrangler.jsonc` 就是真实配置。GitHub Pages 已停用，但完全可回退：把 `www` 的 CNAME 指回 `<user>.github.io`、恢复 ASTRO Pages workflow 即可。
 - `public/_headers` 控制边缘缓存：资源名不带指纹，所以 `/*` 只给 60s、图片 600s，**只有 `/_astro/*` 能 immutable**。别为了省请求给固定名文件上长 TTL，否则日更的图会长期是旧的。
+- **字体必须带 `Access-Control-Allow-Origin: *`**：`sys.th-dd.top` 等站跨域 `@font-face` 引用 `/AaCute.ttf`，跨域字体受 CORS 约束。GitHub Pages 时代平台对所有资源自带 ACAO，Workers 不发；漏掉就是「直接打开 ttf 能看、页面里不生效」（2026-11-20 实测踩过）。
 - 没有 `README_en.md`：英文 README 就是 `README.md`，中文是 `README_zh-cn.md`。
 - 本地 `README*.md` 优先于所有镜像；镜像顺序 raw → `ghp.th-dd.top` 自建镜像 → gitee → jsDelivr，第 5 个 `raw.staticdn.net` 已注释（打不开）。
 - 无 lint、无 test、无 formatter，也没有装 `@astrojs/check`。唯一的闸门是 `pnpm build`。
@@ -93,19 +94,22 @@ pnpm preview  # 4521，验产物
 - **语言**：`initTastro({ defaultLang: "zh", languages: { en, zh } })` 在 `index.astro`，`<title>` 按 `lang` 切换（zh 叹号大帝 / en thdd）。tastro 用 cookie `lang`，控制台 `window.setLang("en")` 可强切。
 - **折叠状态**：README 折叠存 `localStorage.readme-collapsed`，点整条 header 也会触发切换。
 - **页脚**：萌ICP备 20261666 的链接全站只有这一处，别删。
-- **public/.assetsignore** 只排除 `_worker.js`、`_routes.json`。**别顺手把字体/图片排除掉**：`AaCute.ttf`（11.6 MB）虽然本站几乎用不到，但被用户其它站点外链引用，排除就是 404。加完规则重跑一次 `wrangler deploy --dry-run` 看文件数。
+- **public/.assetsignore** 只排除 `_worker.js`、`_routes.json`。判断要不要排除看**有没有对外承诺的稳定 URL**（字体被别的站外链），不是看本站用不用。`AaCute.ttf`（11.6 MB）虽然本站几乎用不到，但被用户其它站点外链引用，排除就是 404。`AaCute.ttf`（11.6 MB）虽然本站几乎用不到，但被用户其它站点外链引用，排除就是 404。加完规则重跑一次 `wrangler deploy --dry-run` 看文件数。
 
 ## 工作流与部署
 
-- `astro.yml`：push 到 `main` / 手动 / 上游资产 workflow 成功后触发 → `pnpm install` + `pnpm astro build --site https://www.th-dd.top` → `wrangler deploy`。需要 secrets `CLOUDFLARE_API_TOKEN`（最小权：Workers Scripts:Edit + Workers Routes:Edit）与 `CLOUDFLARE_ACCOUNT_ID`。Node 26 + pnpm 12，与 CI 保持一致，别随手升。
-  - **合到 main 即上线**：没有灰度、没有人工确认步。合并前确认 secrets 两项都在，且 `www` 没有残留 CNAME（wrangler 绑自定义域会撞名）。
+- **部署主链路是 Cloudflare Workers Builds（CF 侧构建）**：推 `main` → CF 拉仓库 → `pnpm install --frozen-lockfile` + `pnpm astro build --site https://www.th-dd.top` → `npx wrangler deploy`。构建配置在 CF dashboard（Worker `th-dd` → Settings → Builds），**不在仓库里**，改命令只能去面板。
+  - 构建环境变量 `PNPM_VERSION=12.21.0`、`NODE_VERSION=26`；镜像**默认 pnpm 9.10.0**，读不了 v9 lockfile（报 `packages field missing or empty` / `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`）。`package.json` 的 `packageManager` 和 lockfile 里那段 `packageManagerDependencies` 是给这条链兜底的，**别删**。
+  - `astro.yml` 已降级为**手动逃生口**（只有 `workflow_dispatch`）：CF 侧构建挂了可以手动跑它。它仍要 secrets `CLOUDFLARE_API_TOKEN`（最小权：Workers Scripts:Edit + Workers Routes:Edit）与 `CLOUDFLARE_ACCOUNT_ID`。
+  - **合到 main 即上线**：没有灰度、没有人工确认步。合并前确认 `www` 没有残留 CNAME（wrangler 绑自定义域会撞名）。
+  - **别在 CF 面板里点 Deploy、也别点那个在线编辑器**：那会以 `dash_template` 覆盖活动版本成没有静态资源的空壳，全站 530（2026-11-20 踩过，连静态资源都 530）。发版只推 commit。
   - 回滚：`pnpm exec wrangler rollback`（退上一个 Worker 版本，秒级）；再不行就把 `www` 的 CNAME 指回 `<user>.github.io`、在仓库 Settings → Pages 重新启用。
   - 缓存：/​* 只 60s，改完网页不必清；真要立刻生效在 CF 后台 Caching → Purge Everything（或按 URL 清）。
   - Pages 相关权限已不需要，`astro.yml` 只有 `contents: read`。
 - `push-gitee.yml`：push / 每日 UTC 16:00 / 手动 → `Yikun/hub-mirror-action` 把 `th-dd`（→`ya2`）和 `thTag/docs` 镜像到 Gitee。
 - `update-gh-stats.yml`：**不能并发跑**（设了 `concurrency: update-assets`，手动触发会排队；否则两次运行会互相覆盖 push）。每日 UTC 16:00 → 用 `gh-space-shooter` 生成 `public/game.webp`、用 `github-profile-3d-contrib` 生成 `public/profile-*.svg`，然后自动提交。**这两个文件是机器产物，别手改**。跑之前会先删旧 SVG，生成器没产出就 `test -f` 失败、整单不提交，避免把旧图重新发布。
 - 生成完还有一步 **光栅化 3D 图**：`rsvg-convert` + Pillow 把 `public/profile-night-green.svg` 转成同图 `profile-night-green.webp`（900 宽），站点卡片用光栅版，原因见「实现约定要点」。这步**没有** `continue-on-error`：失败就让整个 job 失败、不提交，避免「新 SVG 配旧光栅图」；步骤开头先删旧 webp，失败时站点退回 SVG。Pillow 固定版本。
-- 部署触发：`GITHUB_TOKEN` 的 push **不会**触发别的 workflow（站点用本地光栅图，不吃远端刷新，不补链路就会一直停在旧图）。`astro.yml` 因此额外监听本 workflow 的 `workflow_run` 完成事件（只在 `conclusion == success` 时构建），这样既不用给资产 job 加 `actions: write`，部署失败也能在 astro.yml 的 run 里直接看到。上游失败时由 `upstream-guard` job 显式失败，避免 build/deploy 被跳过后整次 run 显示绿灯。
+- 部署触发：`GITHUB_TOKEN` 的 push **不会**产生新 workflow run、也不可靠触发 webhook，所以 `update-gh-stats.yml` 的 checkout 用 `secrets.GH_PAT`（只有带 PAT 的 push 推得动 CF 构建）。`workflow_run` + `upstream-guard` 那套链路已废弃。（站点用本地光栅图，不吃远端刷新，不补链路就会一直停在旧图）。`astro.yml` 因此额外监听本 workflow 的 `workflow_run` 完成事件（只在 `conclusion == success` 时构建），这样既不用给资产 job 加 `actions: write`，部署失败也能在 astro.yml 的 run 里直接看到。上游失败时由 `upstream-guard` job 显式失败，避免 build/deploy 被跳过后整次 run 显示绿灯。
 - 推送冲突：提交步骤是手写的，`git add -A public` → commit → `git fetch` + `git rebase origin/main` → push，最多重试 3 次。中途有人推了 main 不会再直接 non-fast-forward 失败；`fetch-depth: 0` 是给 rebase 留 merge-base 用的，别改回 2。
 - 同一步里还有 **Pillow 压缩**：把 `game.webp` 重编码到 420 宽、q50，帧数/时长/策略不动（860 宽 6.4 MB → 420 宽 2.0 MB）。三条硬约束：① 只能用 Pillow，**别换 sharp**——libwebp 编码器有 16383 px 高度上限，1561 帧的竖条会被它判 `Processed image is too large`；② Pillow 读不到 webp 的逐帧 duration，脚本里默认写死 25 ms（=40fps），**改 `fps` 输入时要同步改这个默认值**；③ 压完若不到原来的 90% 就丢弃压缩结果、保留原图，步骤带 `continue-on-error`，压缩失败不许阻断每日更新。
 - `.github/dependabot.yml`：每周给 npm 和 github-actions 各开一组 PR（已分组降噪）。**没有自动合并 workflow**，PR 需要人合并；合并后若 `pnpm-lock.yaml` 冲突，重新 `pnpm install` 生成再提交。
@@ -119,4 +123,4 @@ Conventional Commits + 中文描述，例如 `fix: 修正浅色模式边框`、`
 1. 社交链接卡片是否恢复（`links.astro`）。
 2. `@astrojs/cloudflare` 现在是纯静态托管、用不到 adapter，依赖里还留着 —— 要不要摘掉。
 3. 补 lint / 类型检查（`@astrojs/check`），把闸门从「能构建」提到「能过检」。
-4. 切 CF 并验证稳定后，去仓库 Settings → Pages 关掉 Pages；确认无回退需要再删 Pages 相关的 workflow 残留。
+4. 去仓库 Settings → Pages 确认 Pages 已关（现在 `th-dd.github.io` 已 404）；Pages 时代的回退路径只留在文档里。
