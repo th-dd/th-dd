@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # 不需要 actions: write——Pages 由 astro.yml 的 workflow_run 触发
+  contents: write   # 不需要 actions: write——部署由下一次 push 的 webhook 触发
 
 concurrency:
   group: update-assets
@@ -20,6 +20,9 @@ jobs:
         with:
           fetch-depth: 0   # 需要在被拒时 rebase 到最新 main，浅克隆容易缺 merge-base
           ref: main
+          # 必须用 PAT 而不是 GITHUB_TOKEN 推：GITHUB_TOKEN 产生的事件不会创建新的
+          # workflow run（官方明文），也依赖同样的机制触发 Cloudflare 侧的构建。
+          token: ${{ secrets.GH_PAT }}
 
       - uses: czl9707/gh-space-shooter@b24c9792454d1a2e0139ccf72840424e1f83c3f2
         with:
@@ -96,6 +99,7 @@ jobs:
       - name: Commit & push assets (rebase onto latest main, retry)
         run: |
           set -e
+          # 远端凭据已由 checkout 步骤换成 GH_PAT，push 才能触发部署
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A public
