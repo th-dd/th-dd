@@ -104,6 +104,7 @@ pnpm preview  # 4521，验产物
   - 构建环境变量 `PNPM_VERSION=12.21.0`、`NODE_VERSION=26`；镜像**默认 pnpm 9.10.0**，读不了 v9 lockfile（报 `packages field missing or empty` / `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`）。`package.json` 的 `packageManager` 和 lockfile 里那段 `packageManagerDependencies` 是给这条链兜底的，**别删**。
   - `astro.yml` 已降级为**手动逃生口**（只有 `workflow_dispatch`）：CF 侧构建挂了可以手动跑它。它仍要 secrets `CLOUDFLARE_API_TOKEN`（最小权：Workers Scripts:Edit + Workers Routes:Edit）与 `CLOUDFLARE_ACCOUNT_ID`。
   - **合到 main 即上线**：没有灰度、没有人工确认步。合并前确认 `www` 没有残留 CNAME（wrangler 绑自定义域会撞名）。
+  - 域名绑定是**声明式**的：`wrangler.jsonc` 的 `routes[].custom_domain` 由每次 `wrangler deploy` 对账（首次部署就自动建好 Custom Domain 和证书，不需要在面板点任何东西）。反过来说，**删掉 `routes` 里那一条，下次部署就会解绑 www**。
   - **别在 CF 面板里点 Deploy、也别点那个在线编辑器**：那会以 `dash_template` 覆盖活动版本成没有静态资源的空壳，全站 530（2026-11-20 踩过，连静态资源都 530）。发版只推 commit。
   - 回滚：`pnpm exec wrangler rollback`（退上一个 Worker 版本，秒级）；再不行就把 `www` 的 CNAME 指回 `<user>.github.io`、在仓库 Settings → Pages 重新启用。
   - 缓存：/​* 只 60s，改完网页不必清；真要立刻生效在 CF 后台 Caching → Purge Everything（或按 URL 清）。
