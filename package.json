@@ -2,6 +2,7 @@
   "name": "th-dd",
   "type": "module",
   "version": "1.0.0",
+  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "dev": "astro dev --port 4520",
     "build": "astro build",
