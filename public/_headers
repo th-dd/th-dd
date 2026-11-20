@@ -1,4 +1,8 @@
 # 规则会叠加：不要用 /* 兜底，否则具体路径的 Cache-Control 会和它拼在一起
+#
+# 字体必须带 Access-Control-Allow-Origin：sys.th-dd.top 等站点跨域 @font-face 引用它，
+# 跨域字体受 CORS 约束。GH Pages 时代平台对所有资源自带 ACAO:*，迁到 Workers 后没有，
+# 漏掉就是"直接打开 ttf 能看、页面里不生效"。
 / 
   Cache-Control: public, max-age=60
 
@@ -10,9 +14,11 @@
 
 /AaCute.woff2
   Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *
 
 /AaCute.ttf
   Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *
 
 /game.webp
   Cache-Control: public, max-age=600
