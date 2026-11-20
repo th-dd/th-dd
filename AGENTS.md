@@ -81,6 +81,8 @@ pnpm preview  # 4521，验产物
 
 提交前跑 `pnpm build`，别只靠 dev 的热更新看效果。构建成功只代表不报错，样式问题还得开页面看。
 
+本机这个仓库目前是**浅克隆**（`--unshallow` 走代理多次失败），所以别直接用 `git rebase origin/main`（会把 33 个提交逐条重放出满屏 add/add 冲突）。要跟远端：`git reset --hard origin/main` 后用 `git checkout <旧提交> -- <文件>` 取回自己的改动再提交。
+
 注意：`Readme.astro` 构建期**先读本地 `README*.md`**（内容永远与仓库一致，且不依赖网络），读不到才按镜像顺序 `fetch`。断网且本地缺文件时卡片才会渲染「加载失败」——别把这种情况当成改坏了。
 
 构建会刷一串 `Astro.request.headers ... is not available on prerendered pages` 的 WARN：tastro 的 `useTastro(Astro.request)` 在静态页上拿不到请求头，语言回退到默认值，功能不受影响。**别为了消警告把 `output` 改成 `server`**。
