@@ -10,7 +10,7 @@
 
 | 项 | 值 |
 | --- | --- |
-| 线上 | https://www.th-dd.top （Cloudflare Workers static assets，自定义域名；apex → www 的 301 由 CF Redirect Rule 做） |
+| 线上 | https://www.th-dd.top （Cloudflare Workers static assets；www 走优选 CNAME，不是 Workers 自定义域；apex → www 的 301 由 CF Redirect Rule 做） |
 | Gitee 镜像 | https://gitee.com/ya2/ya2 （`th-dd` → `ya2`） |
 | 本地 dev | http://localhost:4520 |
 | 本地 preview | http://localhost:4521 |
@@ -25,7 +25,7 @@
 2. **不动技术选型**：不换框架、不引 CSS 框架 / 状态库 / 别的 UI 组件库、不上 SSR（`output` 保持 `static`）。
 3. **卡片样式走变量**：高度、玻璃、圆角、边框全部用 `--bg-card` / `--border-color` 这些 CSS 变量；虚化强度同理走 `--bg-blur` / `--card-blur`，别写死 px。`index.astro` 里那段 `!important` 是压 studioCMS 主题用的，**别去掉**，去掉主题切换就失效。
 4. **i18n 双语成对**：`src/i18n/zh.json` 与 `en.json` 键名必须完全一致，加一个键就两边一起加（缺键时另一语言渲染空）。键名被 `t()` 直接引用，别重命名。
-5. **别动部署事实**：域名（只绑 `www`，apex 靠 CF Redirect Rule 301）、`site`、`wrangler.jsonc` 的 assets/routes、`GITEE_*` / `GH_PAT` / `CLOUDFLARE_*` 这些 secret 名、镜像映射关系。
+5. **别动部署事实**：域名（www 现在是优选 CNAME，`wrangler.jsonc` 故意不声明 `routes`；apex → www 靠 CF Redirect Rule 301）、`site`、`wrangler.jsonc` 的 assets、`GITEE_*` / `GH_PAT` / `CLOUDFLARE_*` 这些 secret 名、镜像映射关系。
 6. **别把 token / 密钥写进代码**，只在 workflow 里用 `secrets.*`。
 7. **文案保持口语**，别改写成书面语；「永远相信美好的事情即将发生」这类签名句别动。
 
@@ -96,15 +96,16 @@ pnpm preview  # 4521，验产物
 - **语言**：`initTastro({ defaultLang: "zh", languages: { en, zh } })` 在 `index.astro`，`<title>` 按 `lang` 切换（zh 叹号大帝 / en thdd）。tastro 用 cookie `lang`，控制台 `window.setLang("en")` 可强切。
 - **折叠状态**：README 折叠存 `localStorage.readme-collapsed`，点整条 header 也会触发切换。
 - **页脚**：萌ICP备 20261666 的链接全站只有这一处，别删。
-- **public/.assetsignore** 只排除 `_worker.js`、`_routes.json`。判断要不要排除看**有没有对外承诺的稳定 URL**（字体被别的站外链），不是看本站用不用。`AaCute.ttf`（11.6 MB）虽然本站几乎用不到，但被用户其它站点外链引用，排除就是 404。`AaCute.ttf`（11.6 MB）虽然本站几乎用不到，但被用户其它站点外链引用，排除就是 404。加完规则重跑一次 `wrangler deploy --dry-run` 看文件数。
+- **public/.assetsignore** 只排除 `_worker.js`、`_routes.json`。判断要不要排除看**有没有对外承诺的稳定 URL**（字体被别的站外链），不是看本站用不用。`AaCute.ttf`（11.6 MB）虽然本站几乎用不到，但被用户其它站点外链引用，排除就是 404。加完规则重跑一次 `wrangler deploy --dry-run` 看文件数。
 
 ## 工作流与部署
 
 - **部署主链路是 Cloudflare Workers Builds（CF 侧构建）**：推 `main` → CF 拉仓库 → `pnpm install --frozen-lockfile` + `pnpm astro build --site https://www.th-dd.top` → `npx wrangler deploy`。构建配置在 CF dashboard（Worker `th-dd` → Settings → Builds），**不在仓库里**，改命令只能去面板。
   - 构建环境变量 `PNPM_VERSION=12.21.0`、`NODE_VERSION=26`；镜像**默认 pnpm 9.10.0**，读不了 v9 lockfile（报 `packages field missing or empty` / `ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE`）。`package.json` 的 `packageManager` 和 lockfile 里那段 `packageManagerDependencies` 是给这条链兜底的，**别删**。
   - `astro.yml` 已降级为**手动逃生口**（只有 `workflow_dispatch`）：CF 侧构建挂了可以手动跑它。它仍要 secrets `CLOUDFLARE_API_TOKEN`（最小权：Workers Scripts:Edit + Workers Routes:Edit）与 `CLOUDFLARE_ACCOUNT_ID`。
-  - **合到 main 即上线**：没有灰度、没有人工确认步。合并前确认 `www` 没有残留 CNAME（wrangler 绑自定义域会撞名）。
-  - 域名绑定是**声明式**的：`wrangler.jsonc` 的 `routes[].custom_domain` 由每次 `wrangler deploy` 对账（首次部署就自动建好 Custom Domain 和证书，不需要在面板点任何东西）。反过来说，**删掉 `routes` 里那一条，下次部署就会解绑 www**。
+  - **合到 main 即上线**：没有灰度、没有人工确认步。
+  - **`wrangler.jsonc` 里不能有 `routes` / `custom_domain`**：www 的 DNS 被换成优选 CNAME（外部管理的 A/CNAME 记录）后，Workers 挂不上自定义域，声明它会让每次部署在触发器阶段失败：`Hostname 'www.th-dd.top' already has externally managed DNS records` [code: 100117]，构建变红（2026-11-21 踩过）。现在的分工是：wrangler 只上传资产和版本，域名/证书/缓存策略由优选方与 CF DNS 侧管。
+  - 因此 CF 面板 Worker → 域 里的“自定义域”列表为空是**正常的**，别去手点添加（会和优选 CNAME 抢）。要看真实状态用 `GET /accounts/{a}/workers/domains`。
   - **别在 CF 面板里点 Deploy、也别点那个在线编辑器**：那会以 `dash_template` 覆盖活动版本成没有静态资源的空壳，全站 530（2026-11-20 踩过，连静态资源都 530）。发版只推 commit。
   - 回滚：`pnpm exec wrangler rollback`（退上一个 Worker 版本，秒级）；再不行就把 `www` 的 CNAME 指回 `<user>.github.io`、在仓库 Settings → Pages 重新启用。
   - 缓存：/​* 只 60s，改完网页不必清；真要立刻生效在 CF 后台 Caching → Purge Everything（或按 URL 清）。

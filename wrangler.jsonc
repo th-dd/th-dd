@@ -8,7 +8,8 @@
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   },
-  // 自定义域名：只绑 www，apex 由 CF 的 Redirect Rule 301 过来；证书由 Cloudflare 签发
-  "routes": [{ "pattern": "www.th-dd.top", "custom_domain": true }],
+  // 故意不声明 routes / custom_domain：www 的 DNS 现在是优选 CNAME（外部管理的记录），
+  // Workers 无法再把它认成自定义域；声明了每次部署都会报 [code: 100117] 并让构建变红。
+  // 域名、证书、缓存策略由优选方与 CF DNS 侧维护；apex → www 的 301 是 CF Redirect Rule。
   "observability": { "enabled": true }
 }
